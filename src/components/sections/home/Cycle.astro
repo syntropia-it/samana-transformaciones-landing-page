@@ -24,9 +24,52 @@ const cycleData = [
         img: materialesImg,
     },
 ];
+
+function splitTitle(title: string): [string, string] {
+    const words = title.split(' ');
+    const mid = Math.ceil(words.length / 2);
+    return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+}
 ---
 
 <section id="ciclo-maestria" class="bg-linear-to-b via-neutral-900 from-black/40 to-zinc-950/60 relative z-30">
+    <div class="cycle-mobile" data-lenis-prevent>
+        {cycleData.map((item, i) => {
+            const [line1, line2] = splitTitle(item.title);
+            return (
+                <div class="cycle-mobile-panel" data-panel-index={i}>
+                    <Image
+                        src={item.img}
+                        alt={item.title}
+                        width={900}
+                        height={1200}
+                        format="webp"
+                        quality="mid"
+                        class="cycle-mobile-bg"
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                    />
+                    <div class="cycle-mobile-overlay"></div>
+                    <div class="cycle-mobile-content">
+                        <span class="cycle-mobile-num">{item.id} / Solución Integral</span>
+                        <div class="cycle-mobile-title">
+                            <div class="clip-wrap"><span class="clip-inner">{line1}</span></div>
+                            <div class="clip-wrap"><span class="clip-inner">{line2}</span></div>
+                        </div>
+                        <p class="cycle-mobile-desc">{item.desc}</p>
+                    </div>
+                    {i < cycleData.length - 1 && (
+                        <div class="cycle-mobile-peek">
+                            <span>{cycleData[i + 1].id} próximo ↓</span>
+                        </div>
+                    )}
+                </div>
+            );
+        })}
+        <div class="cycle-progress-bar">
+            <div class="cycle-progress-fill"></div>
+        </div>
+    </div>
+    <div class="cycle-desktop">
     <div class="relative w-full h-screen scroll-container">
         <div class="sticky top-0 h-screen w-full flex flex-col md:flex-row overflow-hidden">
             <div
@@ -76,6 +119,7 @@ const cycleData = [
                 }
             </div>
         </div>
+    </div>
     </div>
 </section>
 
