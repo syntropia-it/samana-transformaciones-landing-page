@@ -64,7 +64,6 @@ const socialLinks = [
         <a
           href="tel:+541179982004"
           class="flex items-center gap-2 hover:text-white transition-colors hoverable"
-          aria-label="Llamar a Samana"
         >
           <Phone size={20} />
           <span>+54 11 7998-2004</span>
@@ -72,7 +71,6 @@ const socialLinks = [
         <a
           href="mailto:samanatransformaciones@gmail.com"
           class="flex items-center gap-2 hover:text-white transition-colors hoverable"
-          aria-label="Enviar email a Samana"
         >
           <Mail size={20} />
           <span>Escribinos</span>
@@ -168,7 +166,7 @@ const socialLinks = [
           Newsletter
         </h3>
         <p class="text-sm mb-4">Recibe tendencias y tips de diseño.</p>
-        <form class="flex flex-col gap-4">
+        <form class="flex flex-col gap-4" aria-label="Suscripción al newsletter">
           <input
             type="email"
             placeholder="Tu email"

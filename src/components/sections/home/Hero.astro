@@ -12,8 +12,9 @@ const heroSubtitle = "Transformaciones";
     <Image
       src={heroImg}
       alt="Interior de reforma integral por Samana Transformaciones — diseño premium de alta gama"
-      class="hero-img w-full h-full object-cover scale-125 opacity-0 grayscale brightness-110"
+      class="hero-img w-full h-full object-cover scale-125 opacity-0"
       widths={[400, 800, 1200, 2000]}
+      sizes="100vw"
       loading="eager"
       fetchpriority="high"
     />
@@ -41,7 +42,6 @@ const heroSubtitle = "Transformaciones";
       <p
         id="hero-subtitle"
         class="text-sm sm:text-xl font-medium tracking-[0.5em] text-white/90 uppercase"
-        aria-label={heroSubtitle}
       >
         {heroSubtitle.split("").map((char, i) => (
           <span

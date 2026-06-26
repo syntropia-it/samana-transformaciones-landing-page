@@ -177,20 +177,13 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 </script>
 
 <style>
-  #proyectos-preview {
-    will-change: transform;
-    overflow: hidden; 
-  }
-
- 
   [data-projects-track] {
     display: flex;
     width: max-content; 
     height: 100%;
-    will-change: transform;
   }
 
-  img {
+  [data-project-card] img {
     filter: grayscale(100%);
     opacity: 0.5;
     transform: translateZ(0); 
@@ -198,7 +191,8 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     backface-visibility: hidden;
   }
 
-  .group:hover img {
+  .group:hover [data-project-card] img,
+  [data-project-card]:hover img {
     filter: grayscale(0%);
     transform: scale(1.05); 
   }

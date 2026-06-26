@@ -128,7 +128,10 @@ function animateCounters() {
     });
 }
 function sectionFade() {
-    gsap.utils.toArray('section').forEach(section => {
+    const sections = gsap.utils.toArray('section') as HTMLElement[];
+    sections.forEach((section, index) => {
+        // Skip first section (hero area) and above-the-fold content to avoid LCP degradation
+        if (index === 0) return;
         gsap.fromTo(
             section,
             { opacity: 0.4 },
