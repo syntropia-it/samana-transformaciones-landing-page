@@ -131,7 +131,12 @@ function splitTitle(title: string): [string, string] {
 
   const MOBILE_QUERY = '(hover: none) and (pointer: coarse)';
 
+  let mobileObserver: IntersectionObserver | null = null;
+
   function initMobileCycle() {
+    // FIX 1: Disconnect any previous observer to prevent leaks across Astro View Transitions
+    if (mobileObserver) { mobileObserver.disconnect(); mobileObserver = null; }
+
     const container = document.querySelector('.cycle-mobile') as HTMLElement | null;
     const panels = document.querySelectorAll('.cycle-mobile-panel');
     const progressFill = document.querySelector('.cycle-progress-fill') as HTMLElement | null;
@@ -156,10 +161,17 @@ function splitTitle(title: string): [string, string] {
       });
     }, { root: container, threshold: [0.2, 0.5] });
 
+    // FIX 1: Assign to module-level variable so it can be cleaned up on next init
+    mobileObserver = obs;
     panels.forEach(p => obs.observe(p));
 
-    // Activate first panel immediately on load
-    if (panels[0]) panels[0].classList.add('panel-active');
+    // FIX 3: Double rAF ensures browser has painted a "from" frame before applying active state
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (panels[0]) panels[0].classList.add('panel-active');
+        if (progressFill) progressFill.style.width = '33.3%';
+      });
+    });
   }
 
   function initDesktopCycle() {
@@ -389,7 +401,7 @@ function splitTitle(title: string): [string, string] {
 
     /* ── Gold progress bar ── */
     .cycle-progress-bar {
-        position: fixed;
+        position: sticky;
         bottom: 0;
         left: 0;
         right: 0;
@@ -397,14 +409,7 @@ function splitTitle(title: string): [string, string] {
         background: rgba(255, 255, 255, 0.05);
         z-index: 100;
         pointer-events: none;
-        /* Only visible while cycle-mobile is in the viewport */
-        display: none;
-    }
-
-    @media (hover: none) and (pointer: coarse) {
-        .cycle-progress-bar {
-            display: block;
-        }
+        /* Visible only inside .cycle-mobile scroll container — no fixed/global display needed */
     }
 
     .cycle-progress-fill {
