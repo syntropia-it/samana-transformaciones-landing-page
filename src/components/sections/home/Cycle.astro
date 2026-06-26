@@ -124,100 +124,98 @@ function splitTitle(title: string): [string, string] {
 </section>
 
 <script>
-    import gsap from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-    gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger);
 
-    function initCycleScroll() {
-        const container = document.querySelector('.scroll-container');
-        const section = document.querySelector('#ciclo-maestria');
-        const textItems = gsap.utils.toArray('.cycle-text-item');
-        const imgItems = gsap.utils.toArray('.cycle-img');
+  const MOBILE_QUERY = '(hover: none) and (pointer: coarse)';
 
-        if (!container || !section || !textItems.length) return;
+  function initMobileCycle() {
+    const container = document.querySelector('.cycle-mobile') as HTMLElement | null;
+    const panels = document.querySelectorAll('.cycle-mobile-panel');
+    const progressFill = document.querySelector('.cycle-progress-fill') as HTMLElement | null;
 
-        // Limpieza quirúrgica
-        ScrollTrigger.getAll().forEach(st => {
-            if (st.trigger === container) st.kill();
-        });
+    if (!container || !panels.length) return;
 
-        const totalItems = textItems.length;
+    const progressSteps = [33.3, 66.6, 100];
 
-        // Estado inicial explícito (nada al azar)
-        gsap.set(textItems, { opacity: 0, y: 40 });
-        gsap.set(imgItems, { opacity: 0, scale: 1.1 });
+    // Reset all panels on re-init (Astro View Transitions)
+    panels.forEach(p => p.classList.remove('panel-active'));
+    if (progressFill) progressFill.style.width = '33.3%';
 
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: container,
-                start: 'top top',
-                end: () => `+=${window.innerHeight * totalItems}`,
-                scrub: 1.5,
-                pin: true,
-                anticipatePin: 1,
-            },
-        });
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          entry.target.classList.add('panel-active');
+          const idx = parseInt((entry.target as HTMLElement).dataset.panelIndex ?? '0');
+          if (progressFill) progressFill.style.width = `${progressSteps[idx]}%`;
+        } else if (entry.intersectionRatio < 0.2) {
+          entry.target.classList.remove('panel-active');
+        }
+      });
+    }, { root: container, threshold: [0.2, 0.5] });
 
-        textItems.forEach((text, i) => {
-            const img = imgItems[i];
-            if (!text || !img) return;
+    panels.forEach(p => obs.observe(p));
 
-            // ENTRADA
-            tl.to(
-                text,
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.2,
-                    ease: 'power2.out',
-                },
-                i
-            );
+    // Activate first panel immediately on load
+    if (panels[0]) panels[0].classList.add('panel-active');
+  }
 
-            tl.to(
-                img,
-                {
-                    opacity: 0.6,
-                    scale: 1,
-                    duration: 0.2,
-                    ease: 'power2.out',
-                },
-                i
-            );
+  function initDesktopCycle() {
+    const container = document.querySelector('.scroll-container');
+    const textItems = gsap.utils.toArray('.cycle-text-item');
+    const imgItems = gsap.utils.toArray('.cycle-img');
 
-            // SALIDA (excepto el último)
-            if (i < totalItems - 1) {
-                tl.to(
-                    text,
-                    {
-                        opacity: 0,
-                        y: -40,
-                        duration: 0.2,
-                        ease: 'power2.in',
-                    },
-                    i + 0.7
-                );
+    if (!container || !textItems.length) return;
 
-                tl.to(
-                    img,
-                    {
-                        opacity: 0,
-                        scale: 1.1,
-                        duration: 0.2,
-                        ease: 'power2.in',
-                    },
-                    i + 0.7
-                );
-            }
-        });
-
-        ScrollTrigger.refresh();
-    }
-
-    document.addEventListener('astro:page-load', () => {
-        requestAnimationFrame(initCycleScroll);
+    ScrollTrigger.getAll().forEach(st => {
+      if (st.trigger === container) st.kill();
     });
+
+    const totalItems = textItems.length;
+
+    gsap.set(textItems, { opacity: 0, y: 40 });
+    gsap.set(imgItems, { opacity: 0, scale: 1.1 });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: 'top top',
+        end: () => `+=${window.innerHeight * totalItems}`,
+        scrub: 1.5,
+        pin: true,
+        anticipatePin: 1,
+      },
+    });
+
+    textItems.forEach((text: any, i: number) => {
+      const img = imgItems[i];
+      if (!text || !img) return;
+
+      tl.to(text, { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }, i);
+      tl.to(img, { opacity: 0.6, scale: 1, duration: 0.2, ease: 'power2.out' }, i);
+
+      if (i < totalItems - 1) {
+        tl.to(text, { opacity: 0, y: -40, duration: 0.2, ease: 'power2.in' }, i + 0.7);
+        tl.to(img, { opacity: 0, scale: 1.1, duration: 0.2, ease: 'power2.in' }, i + 0.7);
+      }
+    });
+
+    ScrollTrigger.refresh();
+  }
+
+  function initCycleScroll() {
+    if (window.matchMedia(MOBILE_QUERY).matches) {
+      initMobileCycle();
+    } else {
+      initDesktopCycle();
+    }
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    requestAnimationFrame(initCycleScroll);
+  });
 </script>
 
 <style>
