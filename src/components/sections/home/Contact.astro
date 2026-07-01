@@ -82,5 +82,41 @@
     #progress-bar-line {
       will-change: width;
     }
+
+    @media (hover: none) and (pointer: coarse) {
+      /* Offset del navbar fijo (56px) + aire encima del eyebrow */
+      #contacto {
+        padding-top: 76px;
+        padding-bottom: 28px;
+      }
+
+      /* h2: reducido para mobile */
+      .contact-info h2 {
+        font-size: 2.6rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.75rem;
+        line-height: 0.95;
+      }
+
+      /* Descripción: menos margen inferior */
+      .contact-info p {
+        margin-bottom: 1.25rem;
+      }
+
+      /* Progress: gap más compacto */
+      .contact-info .flex.flex-col {
+        gap: 0.75rem;
+      }
+
+      /* Grid: gap reducido en mobile */
+      #contacto .container {
+        gap: 1.5rem;
+      }
+
+      /* Form card: altura mínima reducida en mobile */
+      .form-card {
+        min-height: 360px;
+      }
+    }
   </style>
 </section>

@@ -90,6 +90,11 @@ const navLinks = [
 </nav>
 
 <script>
+    // scrollCleanup tracks the active window scroll listener so we can remove it
+    // before re-running setupNavbar on each navigation (prevents listener accumulation)
+    let scrollCleanup: (() => void) | null = null;
+    void scrollCleanup; // tell TS the variable is intentionally read later in callbacks
+
     function setupNavbar() {
         const navbar = document.querySelector('[data-navbar]');
         const btn = document.getElementById('mobile-menu-btn');
@@ -181,24 +186,28 @@ const navLinks = [
         });
 
         // Scroll
-        window.addEventListener(
-            'scroll',
-            () => {
-                if (!navbar) return;
-                if (window.scrollY > 200 || isOpen) {
-                    navbar.classList.add('bg-black/70', 'backdrop-blur-md', 'py-4');
-                    navbar.classList.remove('mix-blend-difference', 'py-6');
-                } else {
-                    navbar.classList.remove('bg-black/70', 'backdrop-blur-md', 'py-4');
-                    navbar.classList.add('mix-blend-difference', 'py-6');
-                }
-            },
-            { passive: true }
-        );
+        function onScroll() {
+            if (!navbar) return;
+            if (window.scrollY > 200 || isOpen) {
+                navbar.classList.add('bg-black/70', 'backdrop-blur-md', 'py-4');
+                navbar.classList.remove('mix-blend-difference', 'py-6');
+            } else {
+                navbar.classList.remove('bg-black/70', 'backdrop-blur-md', 'py-4');
+                navbar.classList.add('mix-blend-difference', 'py-6');
+            }
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        scrollCleanup = () => window.removeEventListener('scroll', onScroll);
     }
 
     setupNavbar();
-    document.addEventListener('astro:after-swap', setupNavbar);
+    document.addEventListener('astro:after-swap', () => {
+        // Remove previous scroll listener before installing a new one
+        scrollCleanup?.();
+        scrollCleanup = null;
+        setupNavbar();
+    });
 </script>
 
 <style>

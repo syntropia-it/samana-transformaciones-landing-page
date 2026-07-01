@@ -3,32 +3,44 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 
 const proyectosDestacados = await getCollection('projects');
-
 proyectosDestacados.sort((a, b) => b.data.year - a.data.year);
-
 const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 ---
 
-<section 
+<section
   id="proyectos-preview"
-  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden py-24"
+  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden md:py-24"
 >
-  <!-- Header fijo -->
-  <div class="px-6 container mx-auto mb-12">
+  <!-- Header -->
+  <div class="px-6 container mx-auto mb-10 md:mb-12" data-mobile-header>
     <div class="flex justify-between items-end">
-      <div>
-        <span class="text-xs font-serif font-bold tracking-[0.3em] text-samana-1 uppercase block mb-4">
-          Portfolio
-        </span>
-        <h2 class="text-4xl md:text-6xl font-bold text-white font-serif">
+      <div class="flex-1">
+        <!-- Eyebrow row: label izquierda + dots derecha (solo mobile) -->
+        <div class="flex items-center justify-between md:block">
+          <span class="text-xs font-serif font-bold tracking-[0.3em] text-samana-1 uppercase block">
+            Portfolio
+          </span>
+          <!-- Dots: misma fila que eyebrow en mobile -->
+          <div class="flex md:hidden gap-[5px] items-center" aria-hidden="true">
+            {proyectosParaMostrar.map((_, i) => (
+              <span
+                data-gallery-dot={i}
+                class="h-[2px] rounded-full transition-all duration-300 ease-out"
+                style="width:14px;background:rgba(255,255,255,.12);"
+              />
+            ))}
+          </div>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-bold text-white font-serif mt-2 md:mt-4">
           Proyectos Destacados
         </h2>
-        <p class="text-gray-300 max-w-md mt-4">
+        <!-- Descripción: solo desktop -->
+        <p class="hidden md:block text-gray-300 max-w-md mt-4">
           Desliza para ver nuestras transformaciones más emblemáticas.
         </p>
       </div>
 
-      <a 
+      <a
         href="/proyectos"
         class="hidden md:inline-block border border-samana-1 text-samana-1 px-6 py-3 font-bold hover:bg-samana-1 hover:text-black transition-all hoverable"
         data-cta="view-all-projects"
@@ -38,59 +50,80 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     </div>
   </div>
 
-  <!-- Track de proyectos (scroll horizontal) -->
-  <div class="relative">
-    <div 
+  <!-- Stage: cono de proyector via ::after / ::before en mobile -->
+  <div class="relative" data-gallery-stage>
+    <div
       class="flex gap-[4vw] px-[10vw] w-max"
       data-projects-track
     >
       {proyectosParaMostrar.map((p, i) => (
-        <article 
-          class="relative w-[70vw] md:w-[28vw] h-[50vh] shrink-0 group hoverable"
+        <article
+          class="relative w-[70vw] md:w-[28vw] md:h-[50vh] shrink-0 group hoverable"
           data-project-card={i}
         >
-          <!-- Número grande de fondo -->
-          <div 
-            class="absolute -top-20 z-50 -left-15 text-[8rem] leading-none font-bold text-transparent opacity-50  font-serif pointer-events-none"
-            style={`-webkit-text-stroke:2px #ffd700;`}
+          <!-- Número: desktop 8rem / mobile 3.4rem en esquina (via CSS) -->
+          <div
+            class="absolute -top-20 z-50 -left-15 text-[8rem] leading-none font-bold text-transparent opacity-50 font-serif pointer-events-none"
+            style="-webkit-text-stroke:2px #ffd700;"
+            data-project-num
             aria-hidden="true"
           >
             {String(i + 1).padStart(2, '0')}
           </div>
 
-          <!-- Link al proyecto -->
-          <a 
+          <a
             href={`/proyectos/${String(p.slug)}`}
             class="block"
             data-cta={`project-${p.slug}`}
           >
             <!-- Imagen -->
-            <div class="aspect-video overflow-hidden relative z-10 border border-white/10 group-hover:border-samana-1/40 transition-colors duration-500">
+            <div
+              class="aspect-video overflow-hidden relative z-10 border border-white/10 group-hover:border-samana-1/40 transition-colors duration-500"
+              data-project-img-wrap
+            >
               <Image
-                    src={p.data.image}
-                    alt={p.data.title}
-                    width={900}
-                    height={600}
-                    sizes="(min-width: 768px) 35vw, 60vw"
-                    loading={i === 0 ? "eager" : "lazy"}
-                    priority={i === 0}
-                    class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                  />
+                src={p.data.image}
+                alt={p.data.title}
+                width={900}
+                height={600}
+                sizes="(min-width: 768px) 35vw, 60vw"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                priority={i === 0}
+                class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out"
+              />
+              <!-- Info overlay: solo mobile (superpuesto dentro de la imagen) -->
+              <div class="md:hidden absolute inset-x-0 bottom-0 z-10 pointer-events-none" data-project-info-mobile>
+                <div
+                  class="flex justify-between items-end px-3 pb-2.5 pt-7"
+                  style="background:linear-gradient(to top,rgba(0,0,0,.96) 0%,rgba(0,0,0,.7) 42%,rgba(0,0,0,.2) 72%,transparent 100%);"
+                >
+                  <div>
+                    <h3
+                      class="text-sm font-bold text-white font-serif leading-tight"
+                      data-mobile-title
+                    >{p.data.title}</h3>
+                    <p
+                      class="font-mono text-white/30 uppercase mt-0.5 tracking-widest"
+                      style="font-size:10px;"
+                    >{p.data.category}</p>
+                  </div>
+                  <div
+                    class="font-mono text-samana-1 flex-shrink-0 ml-2"
+                    style="font-size:9px;"
+                  >{p.data.year}</div>
+                </div>
+              </div>
             </div>
 
-            <!-- Info -->
-            <div class="mt-6 flex justify-between items-end">
+            <!-- Info debajo de imagen: solo desktop -->
+            <div class="hidden md:flex mt-6 justify-between items-end">
               <div>
                 <h3 class="text-xl md:text-2xl font-bold text-white group-hover:text-samana-1 transition-colors">
                   {p.data.title}
                 </h3>
-                <p class="text-xs font-mono text-gray-300 uppercase mt-2">
-                  {p.data.category}
-                </p>
+                <p class="text-xs font-mono text-gray-300 uppercase mt-2">{p.data.category}</p>
               </div>
-              <div class="text-samana-1 font-mono text-sm">
-                {p.data.year}
-              </div>
+              <div class="text-samana-1 font-mono text-sm">{p.data.year}</div>
             </div>
           </a>
         </article>
@@ -98,13 +131,16 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     </div>
   </div>
 
-  <!-- CTA mobile -->
-  <div class="md:hidden text-center mt-20 md:mt-12 px-6">
-    <a 
+  <!-- CTA mobile: compact bottom bar -->
+  <div class="md:hidden flex items-center justify-between" data-mobile-cta>
+    <span class="font-mono text-white/15 uppercase tracking-widest" style="font-size:9px;">deslizá</span>
+    <a
       href="/proyectos"
-      class="inline-block border border-samana-1 text-samana-1 px-6 py-3 font-bold hover:bg-samana-1 hover:text-black transition-all w-full max-w-sm"
+      class="font-mono text-samana-1 uppercase tracking-widest hoverable"
+      style="font-size:9px;border-bottom:1px solid rgba(255,215,0,.2);padding-bottom:1px;"
+      data-cta="view-all-projects-mobile"
     >
-      Ver todos los proyectos →
+      Ver todos →
     </a>
   </div>
 </section>
@@ -115,63 +151,127 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 
   gsap.registerPlugin(ScrollTrigger);
 
-  let ctx: gsap.Context; 
+  const MOBILE_QUERY = '(hover: none) and (pointer: coarse)';
+  let ctx: gsap.Context;
 
-  function initHorizontalScroll() {
-    if (ctx) ctx.revert();
-
-    const track = document.querySelector('[data-projects-track]');
-    const section = document.querySelector('#proyectos-preview');
-
+  function initDesktopGallery() {
+    const track   = document.querySelector('[data-projects-track]') as HTMLElement | null;
+    const section = document.querySelector('#proyectos-preview') as HTMLElement | null;
     if (!track || !section) return;
 
-    ctx = gsap.context(() => {
-      
-      const getScrollAmount = () => {
-        let trackWidth = track.scrollWidth;
-        return -(trackWidth - window.innerWidth);
-      };
+    const getScrollAmount = () => -(track.scrollWidth - window.innerWidth);
 
-      const tween = gsap.to(track, {
-        x: getScrollAmount,
+    const tween = gsap.to(track, {
+      x: getScrollAmount,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${track.scrollWidth - window.innerWidth}`,
+        pin: true,
+        scrub: 1,
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
+      },
+    });
+
+    track.querySelectorAll('img').forEach(img => {
+      gsap.to(img, {
         ease: 'none',
         scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: () => `+=${track.scrollWidth - window.innerWidth}`, 
-          pin: true,
-          scrub: 1,
-          invalidateOnRefresh: true, 
-          anticipatePin: 1, 
+          trigger: img,
+          containerAnimation: tween,
+          start: 'left right',
+          end: 'right left',
+          scrub: true,
         },
       });
-       const images = track.querySelectorAll('img');
-      images.forEach(img => {
-        gsap.to(img, {
-          
-          ease: 'none',
-          scrollTrigger: {
-            trigger: img,
-            containerAnimation: tween,
-            start: 'left right',
-            end: 'right left',
-            scrub: true,
-          }
-        });
-      });
+    });
+  }
 
-    }, section); 
+  function initMobileGallery() {
+    const track   = document.querySelector('[data-projects-track]') as HTMLElement | null;
+    const section = document.querySelector('#proyectos-preview') as HTMLElement | null;
+    if (!track || !section) return;
+
+    const cards = Array.from(section.querySelectorAll('[data-project-card]')) as HTMLElement[];
+    const dots  = Array.from(section.querySelectorAll('[data-gallery-dot]')) as HTMLElement[];
+
+    // Portrait: card casi fullwidth. 34px de PAD cada lado → ~22px de sliver visible tras el gap
+    const W      = section.offsetWidth;
+    const CARD_W = W - 68;
+    const GAP    = 12;
+    const PAD    = Math.round((W - CARD_W) / 2); // = 34
+
+    // Aplica ancho de card via JS (el alto lo maneja el CSS)
+    cards.forEach(c => { c.style.width = `${CARD_W}px`; });
+
+    track.style.paddingLeft  = `${PAD}px`;
+    track.style.paddingRight = `${PAD}px`;
+    track.style.gap          = `${GAP}px`;
+
+    const getDist = () => (cards.length - 1) * ((section.offsetWidth - 68) + GAP);
+
+    function setActive(idx: number) {
+      cards.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+      dots.forEach((d, i) => {
+        d.style.width      = i === idx ? '22px' : '14px';
+        d.style.background = i === idx ? 'rgb(255,215,0)' : 'rgba(255,255,255,.12)';
+      });
+    }
+
+    function detectActive() {
+      if (!section) return;
+      const sBox = section.getBoundingClientRect();
+      const cx   = sBox.left + sBox.width / 2;
+      let best = 0, bestD = Infinity;
+      cards.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        const d = Math.abs(r.left + r.width / 2 - cx);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      setActive(best);
+    }
+
+    setActive(0);
+
+    gsap.to(track, {
+      x: () => -getDist(),
+      ease: 'none',
+      onUpdate: detectActive,
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${getDist()}`,
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
   }
 
   document.addEventListener('astro:page-load', () => {
     requestAnimationFrame(() => {
-       initHorizontalScroll();
-       setTimeout(() => ScrollTrigger.refresh(), 500); 
+      if (ctx) ctx.revert();
+
+      const section = document.querySelector('#proyectos-preview');
+      if (!section) return;
+
+      ctx = gsap.context(() => {
+        if (window.matchMedia(MOBILE_QUERY).matches) {
+          initMobileGallery();
+        } else {
+          initDesktopGallery();
+        }
+      }, section);
+
+      requestAnimationFrame(() => requestAnimationFrame(() => ScrollTrigger.refresh()));
     });
   });
- 
+
   document.addEventListener('astro:before-swap', () => {
-    if (ctx) ctx.revert(); 
+    if (ctx) ctx.revert();
     ScrollTrigger.getAll().forEach(t => t.kill());
   });
 </script>
@@ -179,21 +279,146 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 <style>
   [data-projects-track] {
     display: flex;
-    width: max-content; 
+    width: max-content;
     height: 100%;
   }
 
-  [data-project-card] img {
-    filter: grayscale(100%);
-    opacity: 0.5;
-    transform: translateZ(0); 
-    transition: filter 0.6s ease-out, transform 1s ease-out;
-    backface-visibility: hidden;
+  /* ── Desktop: grayscale + hover ── */
+  @media (hover: hover) and (pointer: fine) {
+    [data-project-card] img {
+      filter: grayscale(100%);
+      opacity: 0.5;
+      transform: translateZ(0);
+      transition: filter 0.6s ease-out, transform 1s ease-out;
+      backface-visibility: hidden;
+    }
+    [data-project-card]:hover img {
+      filter: grayscale(0%);
+      transform: scale(1.05);
+    }
   }
 
-  .group:hover [data-project-card] img,
-  [data-project-card]:hover img {
-    filter: grayscale(0%);
-    transform: scale(1.05); 
+  /* ════════════════════════════════════════════
+     MOBILE — portrait immersivo
+  ════════════════════════════════════════════ */
+  @media (hover: none) and (pointer: coarse) {
+
+    /* Sección: fullscreen flex column, con offset del navbar fijo */
+    #proyectos-preview {
+      height: 100svh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 56px; /* despeja el navbar fijo */
+      padding-bottom: 0;
+    }
+
+    /* Header: 15% del área disponible (post-navbar), centrado verticalmente */
+    [data-mobile-header] {
+      flex: 0 0 15%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 16px;
+      margin-bottom: 0;
+      container: unset;
+      max-width: unset;
+      overflow: hidden;
+    }
+
+    /* h2 reducido para caber en el 15% */
+    [data-mobile-header] h2 {
+      font-size: 1.55rem;
+      line-height: 1.05;
+      margin-top: 3px;
+    }
+
+    /* Stage: 80% del área disponible */
+    [data-gallery-stage] {
+      flex: 0 0 80%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Track: altura completa del stage */
+    [data-projects-track] {
+      height: 100%;
+    }
+
+    /* Cards: portrait — alto llena el stage, ancho por JS */
+    [data-project-card] {
+      height: 100%;
+      width: calc(100vw - 68px); /* fallback; JS lo sobreescribe */
+    }
+
+    /* Link dentro de la card: debe ser block y llenar la altura */
+    [data-project-card] > a {
+      display: block;
+      height: 100%;
+    }
+
+    /* Image wrap: portrait, sin aspect-ratio 16:9 */
+    [data-project-img-wrap] {
+      aspect-ratio: unset;
+      height: 100%;
+      width: 100%;
+    }
+
+    [data-project-card] img {
+      opacity: 1;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      transition: filter 0.5s ease;
+    }
+
+    /* Inactiva: gris muy oscuro */
+    [data-project-card]:not(.is-active) img {
+      filter: grayscale(100%) brightness(0.22);
+    }
+
+    /* Activa: color real */
+    [data-project-card].is-active img {
+      filter: none;
+    }
+
+    /* Activa: borde dorado */
+    [data-project-card].is-active [data-project-img-wrap] {
+      border-color: rgba(255, 215, 0, 0.22);
+      box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.18),
+        0 0 22px rgba(255, 215, 0, 0.11),
+        0 0 52px rgba(255, 215, 0, 0.05);
+    }
+
+    /* Info overlay: gradiente más alto para portrait */
+    [data-project-info-mobile] > div {
+      padding-top: 5rem;
+      padding-bottom: 1rem;
+    }
+
+    /* Info overlay: título apagado en inactiva */
+    [data-project-card]:not(.is-active) [data-mobile-title] {
+      color: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Número: dentro de la imagen, esquina superior izquierda */
+    [data-project-num] {
+      font-size: 2rem;
+      top: 10px;
+      left: 10px;
+      opacity: 0.22;
+      -webkit-text-stroke-width: 0.8px;
+      transition: opacity 0.45s ease, -webkit-text-stroke-color 0.45s ease;
+    }
+    [data-project-card].is-active [data-project-num] {
+      opacity: 0.42;
+      -webkit-text-stroke-color: rgba(255, 215, 0, 0.5);
+    }
+
+    /* CTA bottom bar: 5% del área disponible */
+    [data-mobile-cta] {
+      flex: 0 0 5%;
+      padding: 0 16px;
+      align-items: center;
+    }
   }
 </style>

@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import disenoImg from '../../../assets/cycle/diseno.jpg';
+import disenoImg from '../../../assets/diseno-renderizado.jpeg';
 import reformasImg from '../../../assets/cycle/reformas.jpg';
 import materialesImg from '../../../assets/cycle/materiales.jpg';
 
@@ -57,17 +57,12 @@ function splitTitle(title: string): [string, string] {
                         </div>
                         <p class="cycle-mobile-desc">{item.desc}</p>
                     </div>
-                    {i < cycleData.length - 1 && (
-                        <div class="cycle-mobile-peek">
-                            <span>{cycleData[i + 1].id} próximo ↓</span>
-                        </div>
-                    )}
                 </div>
             );
         })}
-        <div class="cycle-progress-bar">
-            <div class="cycle-progress-fill"></div>
-        </div>
+    </div>
+    <div class="cycle-progress-bar">
+        <div class="cycle-progress-fill"></div>
     </div>
     <div class="cycle-desktop">
     <div class="relative w-full h-[80dvh] md:h-screen scroll-container">
@@ -131,47 +126,54 @@ function splitTitle(title: string): [string, string] {
 
   const MOBILE_QUERY = '(hover: none) and (pointer: coarse)';
 
-  let mobileObserver: IntersectionObserver | null = null;
+  let mobileScrollCleanup: (() => void) | null = null;
 
   function initMobileCycle() {
-    // FIX 1: Disconnect any previous observer to prevent leaks across Astro View Transitions
-    if (mobileObserver) { mobileObserver.disconnect(); mobileObserver = null; }
+    if (mobileScrollCleanup) { mobileScrollCleanup(); mobileScrollCleanup = null; }
 
     const container = document.querySelector('.cycle-mobile') as HTMLElement | null;
-    const panels = document.querySelectorAll('.cycle-mobile-panel');
+    const panels = Array.from(document.querySelectorAll('.cycle-mobile-panel')) as HTMLElement[];
     const progressFill = document.querySelector('.cycle-progress-fill') as HTMLElement | null;
 
     if (!container || !panels.length) return;
 
-    const progressSteps = [33.3, 66.6, 100];
+    const scrollEl = container;
+    const panelCount = panels.length;
 
-    // Reset all panels on re-init (Astro View Transitions)
     panels.forEach(p => p.classList.remove('panel-active'));
-    if (progressFill) progressFill.style.width = '33.3%';
 
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-          entry.target.classList.add('panel-active');
-          const idx = parseInt((entry.target as HTMLElement).dataset.panelIndex ?? '0');
-          if (progressFill) progressFill.style.width = `${progressSteps[idx]}%`;
-        } else if (entry.intersectionRatio < 0.2) {
-          entry.target.classList.remove('panel-active');
+    function updateActivePanel() {
+      const activeIndex = Math.min(
+        Math.round(scrollEl.scrollTop / scrollEl.clientHeight),
+        panelCount - 1
+      );
+      panels.forEach((p, i) => p.classList.toggle('panel-active', i === activeIndex));
+      if (progressFill) progressFill.style.width = `${((activeIndex + 1) / panelCount) * 100}%`;
+    }
+
+    const bar = document.querySelector('.cycle-progress-bar') as HTMLElement | null;
+    const section = document.querySelector('#ciclo-maestria') as HTMLElement | null;
+    let sectionObs: IntersectionObserver | null = null;
+
+    if (section) {
+      sectionObs = new IntersectionObserver(([entry]) => {
+        if (bar) bar.style.opacity = entry.isIntersecting ? '1' : '0';
+        if (entry.isIntersecting) {
+          // Sección entró al viewport: activar panel actual y disparar animación
+          updateActivePanel();
+        } else {
+          // Sección salió: resetear para que la animación se repita en la próxima visita
+          panels.forEach(p => p.classList.remove('panel-active'));
         }
-      });
-    }, { root: container, threshold: [0.2, 0.5] });
+      }, { threshold: 0.15 });
+      sectionObs.observe(section);
+    }
 
-    // FIX 1: Assign to module-level variable so it can be cleaned up on next init
-    mobileObserver = obs;
-    panels.forEach(p => obs.observe(p));
-
-    // FIX 3: Double rAF ensures browser has painted a "from" frame before applying active state
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (panels[0]) panels[0].classList.add('panel-active');
-        if (progressFill) progressFill.style.width = '33.3%';
-      });
-    });
+    scrollEl.addEventListener('scroll', updateActivePanel, { passive: true });
+    mobileScrollCleanup = () => {
+      scrollEl.removeEventListener('scroll', updateActivePanel);
+      sectionObs?.disconnect();
+    };
   }
 
   function initDesktopCycle() {
@@ -227,6 +229,11 @@ function splitTitle(title: string): [string, string] {
 
   document.addEventListener('astro:page-load', () => {
     requestAnimationFrame(initCycleScroll);
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    if (mobileScrollCleanup) { mobileScrollCleanup(); mobileScrollCleanup = null; }
+    ScrollTrigger.getAll().forEach(t => t.kill());
   });
 </script>
 
@@ -303,7 +310,7 @@ function splitTitle(title: string): [string, string] {
         bottom: 0;
         left: 0;
         right: 0;
-        padding: 28px 24px 48px;
+        padding: 28px 24px max(80px, env(safe-area-inset-bottom, 80px));
         z-index: 2;
     }
 
@@ -339,8 +346,8 @@ function splitTitle(title: string): [string, string] {
     }
 
     .cycle-mobile-desc {
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.45);
+        font-size: 0.8125rem;
+        color: rgba(255, 255, 255, 0.72);
         line-height: 1.7;
         font-weight: 300;
         margin-top: 14px;
@@ -366,7 +373,7 @@ function splitTitle(title: string): [string, string] {
     }
 
     .cycle-mobile-panel.panel-active .cycle-mobile-desc {
-        opacity: 0.45;
+        opacity: 1;
     }
 
     /* ── Next-service peek ── */
@@ -401,15 +408,21 @@ function splitTitle(title: string): [string, string] {
 
     /* ── Gold progress bar ── */
     .cycle-progress-bar {
-        position: sticky;
+        display: none;
+        position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
         height: 2px;
-        background: rgba(255, 255, 255, 0.05);
-        z-index: 100;
+        background: rgba(255, 255, 255, 0.08);
+        z-index: 999;
         pointer-events: none;
-        /* Visible only inside .cycle-mobile scroll container — no fixed/global display needed */
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+        .cycle-progress-bar { display: block; }
     }
 
     .cycle-progress-fill {
@@ -418,7 +431,7 @@ function splitTitle(title: string): [string, string] {
         background: linear-gradient(
             to right,
             var(--color-samana-1),
-            rgba(255, 215, 0, 0.15)
+            rgba(255, 215, 0, 0.55)
         );
         transition: width 0.45s ease;
     }
