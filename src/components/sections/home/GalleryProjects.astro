@@ -11,7 +11,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 
 <section 
   id="proyectos-preview"
-  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden py-24"
+  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-24 pb-14"
 >
   <!-- Header fijo -->
   <div class="px-6 container mx-auto mb-12">
@@ -50,9 +50,9 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
           data-project-card={i}
         >
           <!-- Número grande de fondo -->
-          <div 
-            class="absolute -top-20 z-50 -left-15 text-[8rem] leading-none font-bold text-transparent opacity-50  font-serif pointer-events-none"
-            style={`-webkit-text-stroke:2px #ffd700;`}
+          <div
+            class="absolute -top-10 z-50 -left-8 text-[4rem] leading-none font-bold text-transparent opacity-30 font-serif pointer-events-none"
+            style="-webkit-text-stroke:1px #ffd700;"
             aria-hidden="true"
           >
             {String(i + 1).padStart(2, '0')}
@@ -99,12 +99,14 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
   </div>
 
   <!-- CTA mobile -->
-  <div class="md:hidden text-center mt-20 md:mt-12 px-6">
-    <a 
+  <div class="md:hidden flex justify-center mt-6 px-6">
+    <a
       href="/proyectos"
-      class="inline-block border border-samana-1 text-samana-1 px-6 py-3 font-bold hover:bg-samana-1 hover:text-black transition-all w-full max-w-sm"
+      class="inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.28em] uppercase text-samana-1/50 hover:text-samana-1 transition-colors duration-500 hoverable"
+      data-cta="view-all-projects-mobile"
     >
-      Ver todos los proyectos →
+      Ver todos los proyectos
+      <span aria-hidden="true" class="block w-5 h-px bg-current transition-all duration-500"></span>
     </a>
   </div>
 </section>
