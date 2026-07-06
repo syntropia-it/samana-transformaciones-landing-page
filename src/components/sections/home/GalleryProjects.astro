@@ -11,10 +11,10 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 
 <section 
   id="proyectos-preview"
-  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-24 pb-14"
+  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-16 md:pt-24 pb-6 md:pb-14"
 >
   <!-- Header fijo -->
-  <div class="px-6 container mx-auto mb-12">
+  <div class="px-6 container mx-auto mb-8 md:mb-12">
     <div class="flex justify-between items-end">
       <div>
         <span class="text-xs font-serif font-bold tracking-[0.3em] text-samana-1 uppercase block mb-4">
@@ -51,7 +51,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
         >
           <!-- Número grande de fondo -->
           <div
-            class="absolute -top-10 z-50 -left-8 text-[4rem] leading-none font-bold text-transparent opacity-30 font-serif pointer-events-none"
+            class="absolute -top-10 z-50 -right-4 text-[4rem] leading-none font-bold text-transparent opacity-30 font-serif pointer-events-none"
             style="-webkit-text-stroke:1px #ffd700;"
             aria-hidden="true"
           >
@@ -102,11 +102,15 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
   <div class="md:hidden flex justify-center mt-6 px-6">
     <a
       href="/proyectos"
-      class="inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.28em] uppercase text-samana-1/50 hover:text-samana-1 transition-colors duration-500 hoverable"
+      class="group inline-flex items-center gap-3 hoverable"
       data-cta="view-all-projects-mobile"
     >
-      Ver todos los proyectos
-      <span aria-hidden="true" class="block w-5 h-px bg-current transition-all duration-500"></span>
+      <span class="text-[10px] font-mono tracking-[0.22em] uppercase text-white/35 group-hover:text-white/60 transition-colors duration-400">
+        Ver todos los proyectos
+      </span>
+      <span class="flex items-center justify-center w-6 h-6 rounded-full border border-samana-1/25 text-samana-1/50 text-xs leading-none group-hover:border-samana-1/50 group-hover:text-samana-1 transition-all duration-400">
+        →
+      </span>
     </a>
   </div>
 </section>
