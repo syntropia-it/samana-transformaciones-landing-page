@@ -1,5 +1,5 @@
 ---
-import { Instagram, Linkedin, Mail, Phone } from "lucide-astro";
+import { Instagram, Phone } from "lucide-astro";
 
 const currentYear = new Date().getFullYear();
 
@@ -30,203 +30,197 @@ const socialLinks = [
     href: "https://www.instagram.com/samanatransformaciones_/",
     icon: Instagram,
   },
-  // { name: 'LinkedIn', href: 'https://linkedin.com/company/samana', icon: Linkedin },
 ];
 ---
 
 <footer
-  class="bg-black text-gray-300 py-8 px-6 relative z-30 border-t border-dashed border-white/15"
+  class="bg-black text-gray-400 relative z-30 border-t border-dashed border-white/15"
 >
-  <!-- Glow Effect -->
+  <!-- Amber glow — top edge only -->
   <div
-    class="absolute inset-0 bg-linear-to-t from-transparent to-amber-900/20 pointer-events-none"
-  >
-  </div>
+    class="absolute inset-0 bg-linear-to-b from-amber-900/15 to-transparent pointer-events-none z-0"
+    aria-hidden="true"
+  ></div>
 
-  <div class="relative z-10 container mx-auto max-w-7xl">
-    <!-- CTA Principal -->
-    <div class="text-center mb-10">
-      <p
-        class="text-sm font-mono tracking-[0.3em] mb-8 text-samana-1/60 uppercase"
-      >
-        Samana Transformaciones
-      </p>
+  <!-- Main content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-10 pb-0">
 
+    <!-- Brand label -->
+    <p class="text-xs font-bold tracking-[0.3em] text-samana-1/60 uppercase mb-3">
+      Samana Transformaciones
+    </p>
+
+    <!-- Email — hero tipográfico -->
+    <a
+      href="mailto:samanatransformaciones@gmail.com"
+      class="block text-xl md:text-4xl font-bold text-white hover:text-samana-1 transition-colors duration-500 leading-none hoverable mb-4 break-all md:break-normal"
+      data-cta="footer-email"
+    >
+      samanatransformaciones@gmail.com
+    </a>
+
+    <!-- Contacts secundarios -->
+    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-0 mb-10 text-sm text-gray-500">
       <a
-        href="mailto:samanatransformaciones@gmail.com"
-        class="text-base md:text-2xl lg:text-4xl font-bold text-white hover:text-samana-1 transition-colors duration-500 font-serif leading-none hoverable inline-block"
-        data-cta="footer-email"
+        href="tel:+541179982004"
+        class="flex items-center gap-1.5 hover:text-white transition-colors hoverable"
       >
-        samanatransformaciones@gmail.com
+        <Phone size={14} aria-hidden="true" />
+        +54 11 7998-2004
       </a>
-
-      <div class="flex gap-6 justify-center mt-8 text-gray-300">
+      <span class="hidden md:inline mx-3 text-gray-700" aria-hidden="true">·</span>
+      {socialLinks.map((s) => (
         <a
-          href="tel:+541179982004"
-          class="flex items-center gap-2 hover:text-white transition-colors hoverable"
+          href={s.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-1.5 hover:text-white transition-colors hoverable"
+          aria-label={`Visitar ${s.name} de Samana`}
         >
-          <Phone size={20} />
-          <span>+54 11 7998-2004</span>
+          <s.icon size={14} aria-hidden="true" />
+          {s.name}
         </a>
-        <a
-          href="mailto:samanatransformaciones@gmail.com"
-          class="flex items-center gap-2 hover:text-white transition-colors hoverable"
-        >
-          <Mail size={20} />
-          <span>Escribinos</span>
-        </a>
-
-        {
-          socialLinks.map((social) => (
-            <a
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="flex items-center gap-2 hover:text-white transition-colors hoverable"
-              aria-label={`Visitar ${social.name} de Samana`}
-            >
-              <social.icon aria-hidden="true" size={20} />
-              <span>{social.name}</span>
-            </a>
-          ))
-        }
-      </div>
+      ))}
     </div>
 
-    <!-- Links Grid -->
-    <div
-      class="grid grid-cols-1 md:grid-cols-4 gap-8 px-5 mb-10 border-t border-white/10 pt-12"
-    >
+    <!-- Nav grid: 2 cols mobile / 3 cols desktop -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-8 pb-10">
+
       <!-- Servicios -->
       <div>
-        <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">
+        <h3 class="text-white font-bold text-xs tracking-[0.22em] uppercase mb-4">
           Servicios
         </h3>
         <ul class="space-y-2">
-          {
-            footerLinks.servicios.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class="hover:text-white transition-colors text-sm hoverable"
-                >
-                  {link.name}
-                </a>
-              </li>
-            ))
-          }
+          {footerLinks.servicios.map((link) => (
+            <li>
+              <a href={link.href} class="text-sm hover:text-white transition-colors hoverable">
+                {link.name}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
 
       <!-- Empresa -->
       <div>
-        <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">
+        <h3 class="text-white font-bold text-xs tracking-[0.22em] uppercase mb-4">
           Empresa
         </h3>
         <ul class="space-y-2">
-          {
-            footerLinks.empresa.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class="hover:text-white transition-colors text-sm hoverable"
-                >
-                  {link.name}
-                </a>
-              </li>
-            ))
-          }
+          {footerLinks.empresa.map((link) => (
+            <li>
+              <a href={link.href} class="text-sm hover:text-white transition-colors hoverable">
+                {link.name}
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
 
-      <!-- Legal -->
-      <div>
-        <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">
+      <!-- Legal — desktop: 3.ª col; mobile: fila horizontal debajo -->
+      <div class="col-span-2 md:col-span-1">
+        <h3 class="text-white font-bold text-xs tracking-[0.22em] uppercase mb-3 md:mb-4">
           Legal
         </h3>
-        <ul class="space-y-2">
-          {
-            footerLinks.legal.map((link) => (
-              <li>
-                <a
-                  href={link.href}
-                  class="hover:text-white transition-colors text-sm hoverable"
-                >
-                  {link.name}
-                </a>
-              </li>
-            ))
-          }
+        <ul class="flex flex-wrap gap-x-4 gap-y-1 md:flex-col md:space-y-2 md:gap-0">
+          {footerLinks.legal.map((link) => (
+            <li>
+              <a href={link.href} class="text-sm hover:text-white transition-colors hoverable">
+                {link.name}
+              </a>
+            </li>
+          ))}
         </ul>
-      </div>
-
-      <!-- Newsletter -->
-      <div>
-        <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">
-          Newsletter
-        </h3>
-        <p class="text-sm mb-4">Recibe tendencias y tips de diseño.</p>
-        <form class="flex flex-col gap-4" aria-label="Suscripción al newsletter">
-          <input
-            type="email"
-            placeholder="Tu email"
-            class="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-sm focus:outline-none focus:border-samana-1 text-white transition-colors rounded"
-            required
-          />
-          <button
-            type="submit"
-            class="bg-samana-1 text-black px-4 py-2 text-sm font-bold hover:bg-samana-1/80 transition-colors rounded"
-          >
-            Suscribirse
-          </button>
-        </form>
       </div>
     </div>
 
-    <!-- Bottom Bar -->
-    <div
-      class="flex gap-8 justify-between items-center border-t border-white/10 pt-8 text-xs font-mono text-gray-600 uppercase"
-    >
-      <span
-        >© {currentYear} Samana Transformaciones. Buenos Aires, Argentina.</span
-      >
+    {/* Newsletter — comentado, listo para activar con integración futura */}
+    {/*
+    <div>
+      <h3 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">Newsletter</h3>
+      <p class="text-sm mb-4">Recibe tendencias y tips de diseño.</p>
+      <form class="flex flex-col gap-4" aria-label="Suscripción al newsletter">
+        <input type="email" placeholder="Tu email" class="flex-1 bg-white/5 border border-white/10 px-4 py-2 text-sm focus:outline-none focus:border-samana-1 text-white transition-colors rounded" required />
+        <button type="submit" class="bg-samana-1 text-black px-4 py-2 text-sm font-bold hover:bg-samana-1/80 transition-colors rounded">Suscribirse</button>
+      </form>
+    </div>
+    */}
 
-      <!-- Social Links -->
-      <div class="flex gap-4">
-        {
-          socialLinks.map((social) => (
-            <a
-              href={social.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="hover:text-white transition-colors hoverable"
-              aria-label={`Visitar ${social.name} de Samana`}
-            >
-              <social.icon aria-hidden="true" size={30} />
-            </a>
-          ))
-        }
-      </div>
+  </div>
+
+  <!-- SAMANA watermark — fuera del contenedor con padding para ir de borde a borde -->
+  <div class="samana-zone relative z-0 overflow-hidden" aria-hidden="true">
+    <span class="samana-text font-bold uppercase whitespace-nowrap inline-block text-white/10">
+      Samana
+    </span>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <span class="text-xs font-mono tracking-[0.12em] uppercase text-gray-700">
+      © {currentYear} Samana Transformaciones. Buenos Aires, Argentina.
+    </span>
+    <div class="flex gap-3">
+      {socialLinks.map((s) => (
+        <a
+          href={s.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-gray-700 hover:text-white transition-colors"
+          aria-label={`Visitar ${s.name} de Samana`}
+        >
+          <s.icon size={22} aria-hidden="true" />
+        </a>
+      ))}
     </div>
   </div>
 </footer>
 
+<style>
+  .samana-text {
+    font-size: 10vw; /* fallback — JS override en astro:page-load */
+    letter-spacing: -0.03em;
+    line-height: 0.82;
+  }
+</style>
+
 <script>
-  const newsletterForm = document.querySelector("footer form");
+  function fitSamana() {
+    const zone = document.querySelector('.samana-zone') as HTMLElement | null;
+    const text = document.querySelector('.samana-text') as HTMLElement | null;
+    if (!zone || !text) return;
 
-  newsletterForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
+    const containerW = zone.getBoundingClientRect().width;
+    if (containerW === 0) return;
 
-    // Track evento
-    if (typeof gtag !== "undefined") {
-      // @ts-ignore
-      gtag("event", "newsletter_signup", {
-        event_category: "Engagement",
-        event_label: "Footer Newsletter",
-      });
+    // inline-block: evita que scrollWidth quede capeado por overflow del padre
+    text.style.display   = 'inline-block';
+    text.style.fontSize  = '200px';
+    text.style.whiteSpace = 'nowrap';
+
+    const textW = text.getBoundingClientRect().width;
+    if (textW === 0) return;
+
+    // 0.99 safety margin → evita clip subpixel; redondear al px → render parejo
+    text.style.fontSize = Math.round((containerW / textW) * 200 * 0.99) + 'px';
+  }
+
+  function applyMode() {
+    const zone = document.querySelector('.samana-zone') as HTMLElement | null;
+    if (!zone) return;
+
+    const isCondensed = document.body.getAttribute('data-pre-footer') === 'cta';
+    zone.style.display = isCondensed ? 'none' : '';
+
+    if (!isCondensed) {
+      requestAnimationFrame(fitSamana);
     }
+  }
 
-    // Aquí iría la lógica de integración con Mailchimp, ConvertKit, etc.
-    alert("¡Gracias por suscribirte! (Integrar con API)");
+  document.addEventListener('astro:page-load', applyMode);
+  window.addEventListener('resize', () => {
+    const zone = document.querySelector('.samana-zone') as HTMLElement | null;
+    if (zone && zone.style.display !== 'none') fitSamana();
   });
 </script>
