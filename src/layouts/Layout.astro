@@ -21,6 +21,7 @@ interface Props {
   publishDate?: Date;
   author?: string;
   tags?: string[];
+  preFooter?: 'cta';
 }
 
 const {
@@ -34,6 +35,7 @@ const {
   publishDate,
   author,
   tags,
+  preFooter,
 } = Astro.props;
 
 // 1. Configuración de URLs seguras
@@ -137,6 +139,7 @@ if (!ratingsProp) {
 
   <body
     class="bg-black min-h-screen text-white selection:bg-[rgb(255,215,0)] selection:text-black overflow-x-hidden"
+    data-pre-footer={preFooter}
   >
     <!-- Skip navigation for keyboard/screen reader users -->
     <a
