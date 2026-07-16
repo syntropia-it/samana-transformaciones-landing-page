@@ -214,7 +214,8 @@ const socialLinks = [
     zone.style.display = isCondensed ? 'none' : '';
 
     if (!isCondensed) {
-      requestAnimationFrame(fitSamana);
+      // fonts.ready ensures Inter 700 is loaded before measuring — handles cold loads
+      document.fonts.ready.then(() => requestAnimationFrame(fitSamana));
     }
   }
 
