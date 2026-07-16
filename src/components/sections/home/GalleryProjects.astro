@@ -9,9 +9,9 @@ proyectosDestacados.sort((a, b) => b.data.year - a.data.year);
 const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 ---
 
-<section 
+<section
   id="proyectos-preview"
-  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-16 md:pt-24 pb-6 md:pb-14"
+  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-12 md:pt-24 pb-0 md:pb-14"
 >
   <!-- Header fijo -->
   <div class="px-6 container mx-auto mb-8 md:mb-12">
@@ -28,7 +28,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
         </p>
       </div>
 
-      <a 
+      <a
         href="/proyectos"
         class="hidden md:inline-block border border-samana-1 text-samana-1 px-6 py-3 font-bold hover:bg-samana-1 hover:text-black transition-all hoverable"
         data-cta="view-all-projects"
@@ -38,34 +38,40 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     </div>
   </div>
 
-  <!-- Track de proyectos (scroll horizontal) -->
-  <div class="relative">
-    <div 
+  <!-- Track de proyectos (GSAP desktop / native scroll mobile) -->
+  <div class="relative" data-projects-wrapper>
+    <!-- Mobile: fade right edge — sugiere más cards -->
+    <div
+      class="md:hidden absolute right-0 top-0 bottom-0 w-16 pointer-events-none z-20"
+      style="background:linear-gradient(to right, transparent, #040404);"
+      aria-hidden="true"
+    ></div>
+
+    <div
       class="flex gap-[4vw] px-[10vw] w-max"
       data-projects-track
     >
       {proyectosParaMostrar.map((p, i) => (
-        <article 
-          class="relative w-[70vw] md:w-[28vw] h-[50vh] shrink-0 group hoverable"
+        <article
+          class="relative w-[70vw] md:w-[28vw] h-auto md:h-[50vh] shrink-0 group hoverable"
           data-project-card={i}
         >
           <!-- Número grande de fondo -->
           <div
-            class="absolute -top-10 z-50 -right-4 text-[4rem] leading-none font-bold text-transparent opacity-30 font-serif pointer-events-none"
-            style="-webkit-text-stroke:1px #ffd700;"
+            class="num-overlay absolute -top-10 md:-top-20 z-50 -left-4 md:-left-12 text-[4rem] md:text-[7rem] leading-none font-bold text-transparent opacity-30 font-serif pointer-events-none"
             aria-hidden="true"
           >
             {String(i + 1).padStart(2, '0')}
           </div>
 
           <!-- Link al proyecto -->
-          <a 
+          <a
             href={`/proyectos/${String(p.slug)}`}
             class="block"
             data-cta={`project-${p.slug}`}
           >
             <!-- Imagen -->
-            <div class="aspect-video overflow-hidden relative z-10 border border-white/10 group-hover:border-samana-1/40 transition-colors duration-500">
+            <div class="aspect-video overflow-hidden relative z-10 border border-white/20 group-hover:border-samana-1/40 transition-colors duration-500">
               <Image
                     src={p.data.image}
                     alt={p.data.title}
@@ -98,19 +104,14 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     </div>
   </div>
 
-  <!-- CTA mobile -->
-  <div class="md:hidden flex justify-center mt-6 px-6">
+  <!-- CTA mobile — flujo normal, siempre visible, con margen del card -->
+  <div class="md:hidden flex justify-center px-6 mt-12 pb-12">
     <a
       href="/proyectos"
-      class="group inline-flex items-center gap-3 hoverable"
+      class="inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.28em] uppercase text-samana-1/50 hover:text-samana-1 transition-colors duration-500 hoverable"
       data-cta="view-all-projects-mobile"
     >
-      <span class="text-[10px] font-mono tracking-[0.22em] uppercase text-white/35 group-hover:text-white/60 transition-colors duration-400">
-        Ver todos los proyectos
-      </span>
-      <span class="flex items-center justify-center w-6 h-6 rounded-full border border-samana-1/25 text-samana-1/50 text-xs leading-none group-hover:border-samana-1/50 group-hover:text-samana-1 transition-all duration-400">
-        →
-      </span>
+      Ver todos los proyectos
     </a>
   </div>
 </section>
@@ -121,18 +122,69 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 
   gsap.registerPlugin(ScrollTrigger);
 
-  let ctx: gsap.Context; 
+  let ctx: gsap.Context | null = null;
 
   function initHorizontalScroll() {
-    if (ctx) ctx.revert();
+    if (ctx) { ctx.revert(); ctx = null; }
 
-    const track = document.querySelector('[data-projects-track]');
-    const section = document.querySelector('#proyectos-preview');
+    const track = document.querySelector('[data-projects-track]') as HTMLElement | null;
+    const wrapper = document.querySelector('[data-projects-wrapper]') as HTMLElement | null;
+    const section = document.querySelector('#proyectos-preview') as HTMLElement | null;
 
-    if (!track || !section) return;
+    if (!track || !section || !wrapper) return;
 
+    // Mobile: GSAP vertical scroll → horizontal card movement (no swipe conflict)
+    if (window.innerWidth < 768) {
+        // Breathing room so -top-10 numbers don't clip against section top
+      wrapper.style.paddingTop = '44px';
+
+      const cards = Array.from(section.querySelectorAll('[data-project-card]')) as HTMLElement[];
+      const ctaLink = section.querySelector('[data-cta="view-all-projects-mobile"]') as HTMLElement | null;
+      let lastActiveIndex = 0;
+      if (cards[0]) cards[0].classList.add('card-active');
+
+      // Refresh after images load so scrollWidth is accurate (not a timing guess)
+      const imgEls = Array.from(track.querySelectorAll('img')) as HTMLImageElement[];
+      Promise.all(imgEls.map(img =>
+        img.complete ? Promise.resolve() : new Promise<void>(resolve => {
+          img.addEventListener('load', () => resolve(), { once: true });
+          img.addEventListener('error', () => resolve(), { once: true });
+        })
+      )).then(() => ScrollTrigger.refresh());
+
+      ctx = gsap.context(() => {
+        gsap.to(track, {
+          x: () => -(track.scrollWidth - window.innerWidth),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: () => `+=${track.scrollWidth - window.innerWidth}`,
+            pin: true,
+            scrub: 1,
+            invalidateOnRefresh: true,
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              const activeIndex = Math.round(self.progress * (cards.length - 1));
+              if (activeIndex !== lastActiveIndex) {
+                cards[lastActiveIndex]?.classList.remove('card-active');
+                cards[activeIndex]?.classList.add('card-active');
+                lastActiveIndex = activeIndex;
+              }
+              // Reveal CTA underline once the last card is reached
+              if (self.progress >= 0.85 && ctaLink && !ctaLink.classList.contains('cta-visible')) {
+                ctaLink.classList.add('cta-visible');
+              }
+            },
+          },
+        });
+      }, section);
+      return;
+    }
+
+    // Desktop: GSAP horizontal pin
     ctx = gsap.context(() => {
-      
+
       const getScrollAmount = () => {
         let trackWidth = track.scrollWidth;
         return -(trackWidth - window.innerWidth);
@@ -144,17 +196,18 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: () => `+=${track.scrollWidth - window.innerWidth}`, 
+          end: () => `+=${track.scrollWidth - window.innerWidth}`,
           pin: true,
           scrub: 1,
-          invalidateOnRefresh: true, 
-          anticipatePin: 1, 
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
         },
       });
-       const images = track.querySelectorAll('img');
+
+      // Scope to card cover images only — avoids future inline logos/badges
+      const images = track.querySelectorAll('[data-project-card] .aspect-video img');
       images.forEach(img => {
         gsap.to(img, {
-          
           ease: 'none',
           scrollTrigger: {
             trigger: img,
@@ -166,40 +219,88 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
         });
       });
 
-    }, section); 
+      // Refresh after images load so pin end-point is accurate
+      const imgEls = Array.from(track.querySelectorAll('img')) as HTMLImageElement[];
+      Promise.all(imgEls.map(img =>
+        img.complete ? Promise.resolve() : new Promise<void>(resolve => {
+          img.addEventListener('load', () => resolve(), { once: true });
+          img.addEventListener('error', () => resolve(), { once: true });
+        })
+      )).then(() => ScrollTrigger.refresh());
+
+    }, section);
   }
 
   document.addEventListener('astro:page-load', () => {
     requestAnimationFrame(() => {
-       initHorizontalScroll();
-       setTimeout(() => ScrollTrigger.refresh(), 500); 
+      initHorizontalScroll();
     });
   });
- 
+
   document.addEventListener('astro:before-swap', () => {
-    if (ctx) ctx.revert(); 
-    ScrollTrigger.getAll().forEach(t => t.kill());
+    if (ctx) { ctx.revert(); ctx = null; }
   });
 </script>
 
 <style>
   [data-projects-track] {
     display: flex;
-    width: max-content; 
+    width: max-content;
     height: 100%;
+  }
+
+  .num-overlay {
+    -webkit-text-stroke: 2px #ffd700;
+  }
+
+  @media (min-width: 768px) {
+    .num-overlay {
+      -webkit-text-stroke: 2.5px #ffd700;
+    }
+  }
+
+
+  [data-cta="view-all-projects-mobile"] {
+    position: relative;
+  }
+
+  [data-cta="view-all-projects-mobile"]::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s ease-out;
+  }
+
+  [data-cta="view-all-projects-mobile"]:hover::after,
+  [data-cta="view-all-projects-mobile"].cta-visible::after {
+    transform: scaleX(1);
   }
 
   [data-project-card] img {
     filter: grayscale(100%);
     opacity: 0.5;
-    transform: translateZ(0); 
-    transition: filter 0.6s ease-out, transform 1s ease-out;
+    transform: translateZ(0);
+    transition: filter 0.6s ease-out, opacity 0.6s ease-out, transform 1s ease-out;
     backface-visibility: hidden;
   }
 
-  .group:hover [data-project-card] img,
+  /* Desktop: hover illumination */
+  .group:hover img,
   [data-project-card]:hover img {
     filter: grayscale(0%);
-    transform: scale(1.05); 
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  /* Mobile: center-of-viewport card illumination via GSAP progress */
+  [data-project-card].card-active img {
+    filter: none;
+    opacity: 1;
   }
 </style>

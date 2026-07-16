@@ -195,6 +195,8 @@ if (!ratingsProp) {
     // behavior: 'instant' bypasses scroll-behavior: smooth on <html>
     // so scrollY is synchronously 0 before Lenis reads it below
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    // Second scroll after rAF: ensures Safari/iOS respects top=0 after DOM paint
+    requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
 
     if (lenis) lenis.destroy();
 
@@ -217,7 +219,8 @@ if (!ratingsProp) {
       gsap.ticker.lagSmoothing(0);
     }
 
-    ScrollTrigger.refresh();
+    // Double-rAF: lets all components register their ScrollTriggers before measuring
+    requestAnimationFrame(() => requestAnimationFrame(() => ScrollTrigger.refresh()));
   };
 
   document.addEventListener("astro:page-load", initScroll);
