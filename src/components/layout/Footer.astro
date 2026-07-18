@@ -34,7 +34,7 @@ const socialLinks = [
 ---
 
 <footer
-  class="bg-black text-gray-400 relative z-30 border-t border-dashed border-white/15"
+  class="bg-black text-gray-400 relative z-30 md:border-t md:border-dashed md:border-white/15 flex flex-col md:min-h-dvh"
 >
   <!-- Amber glow — top edge only -->
   <div
@@ -42,25 +42,25 @@ const socialLinks = [
     aria-hidden="true"
   ></div>
 
-  <!-- Main content -->
-  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-10 pb-0">
+  <!-- Email CTA — centrado -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-10 flex flex-col items-center text-center border-b border-white/[0.06]">
 
     <!-- Brand label -->
-    <p class="text-xs font-bold tracking-[0.3em] text-samana-1/60 uppercase mb-3">
-      Samana Transformaciones
+    <p class="text-xs font-bold tracking-[0.3em] text-samana-1/60 uppercase mb-4">
+      Contanos qué tenés en mente
     </p>
 
     <!-- Email — hero tipográfico -->
     <a
       href="mailto:samanatransformaciones@gmail.com"
-      class="block text-xl md:text-4xl font-bold text-white hover:text-samana-1 transition-colors duration-500 leading-none hoverable mb-4 break-all md:break-normal"
+      class="block text-base md:text-4xl font-bold text-white hover:text-samana-1 transition-colors duration-500 leading-none hoverable mb-5"
       data-cta="footer-email"
     >
       samanatransformaciones@gmail.com
     </a>
 
     <!-- Contacts secundarios -->
-    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-0 mb-10 text-sm text-gray-500">
+    <div class="flex items-center gap-3 text-sm text-gray-500">
       <a
         href="tel:+541179982004"
         class="flex items-center gap-1.5 hover:text-white transition-colors hoverable"
@@ -68,7 +68,7 @@ const socialLinks = [
         <Phone size={14} aria-hidden="true" />
         +54 11 7998-2004
       </a>
-      <span class="hidden md:inline mx-3 text-gray-700" aria-hidden="true">·</span>
+      <span class="text-gray-700" aria-hidden="true">·</span>
       {socialLinks.map((s) => (
         <a
           href={s.href}
@@ -83,7 +83,10 @@ const socialLinks = [
       ))}
     </div>
 
-    <!-- Nav grid: 2 cols mobile / 3 cols desktop -->
+  </div>
+
+  <!-- Nav grid: 2 cols mobile / 3 cols desktop -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-10">
     <div class="grid grid-cols-2 md:grid-cols-3 gap-8 pb-10">
 
       <!-- Servicios -->
@@ -149,8 +152,8 @@ const socialLinks = [
 
   </div>
 
-  <!-- SAMANA watermark — fuera del contenedor con padding para ir de borde a borde -->
-  <div class="samana-zone relative z-0 overflow-hidden" aria-hidden="true">
+  <!-- SAMANA watermark — crece para llenar el espacio restante y empujar el bottom bar -->
+  <div class="samana-zone relative z-0 overflow-hidden flex-1 flex items-end" aria-hidden="true">
     <span class="samana-text font-bold uppercase whitespace-nowrap inline-block text-white/10">
       Samana
     </span>
