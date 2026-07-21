@@ -1,30 +1,38 @@
 @import "tailwindcss";
 
 @theme {
+  /* Gold accent — logo color, primary identity */
   --color-samana-1: #ffd700;
+
   --color-samana-2: #050505;
   --color-samana-3: #0a0a0a;
+
+  /* Prose — shared tokens for MDX and prose-samana */
+  --color-prose-heading: #ffd900c3;
+  --color-prose-body: #9a9590;
+  --color-prose-strong: #e5e0d8;
+
+  /* Layout */
+  --col-text: 65ch;
+  --col-wide: 1200px;
 
   --font-sans: "Inter", "sans-serif";
   --font-serif: "Playfair Display", "serif";
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-in-out;
 }
 
+/* ── Prose Samana (service MDX content) ── */
 .prose-samana h2 {
   font-size: 3rem;
-  font-family: serif;
+  font-family: var(--font-serif);
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
@@ -32,13 +40,15 @@
 .prose-samana p {
   font-size: 1.25rem;
   line-height: 1.8;
-  color: #9ca3af;
+  color: var(--color-prose-body);
 }
 
 .prose-samana img {
   margin: 6rem 0;
   width: 100%;
 }
+
+/* ── Lenis smooth scroll ── */
 html.lenis,
 html.lenis body {
   height: auto;

@@ -1,7 +1,16 @@
 import gsap from "gsap";
 import { FLOW_TREE, type FlowStep, type FlowOption } from "../data/contactFlow";
 
-const FORMSPREE_URL = "https://formspree.io/f/mykdzvoy";
+const FORMSPREE_URL = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT || "https://formspree.io/f/mykdzvoy";
+
+const FALLBACK_HTML = `
+  <p class="text-gray-400 text-sm">
+    El formulario no está disponible en este momento.
+    <a href="mailto:samanatransformaciones@gmail.com" class="text-samana-1 hover:underline">
+      Escribinos directamente
+    </a>.
+  </p>
+`;
 
 export class SamanaForm {
   private container: HTMLElement | null;
@@ -21,13 +30,18 @@ export class SamanaForm {
 
   private init() {
     if (!this.form || !this.container) return;
-    this.renderStep("start");
     this.form.addEventListener("submit", (e) => this.handleSubmit(e));
+    this.renderStep("start");
   }
 
   private renderStep(stepKey: string) {
     const step = FLOW_TREE[stepKey];
-    if (!this.container || !step) return;
+    if (!this.container) return;
+
+    if (!step) {
+      this.container.innerHTML = FALLBACK_HTML;
+      return;
+    }
 
     // Update progress (estimated 4 steps)
     const progress = (this.history.length / 4) * 100;
@@ -136,6 +150,10 @@ export class SamanaForm {
   }
 
   private transition(cb: () => void) {
+    if (!this.container) {
+      cb();
+      return;
+    }
     gsap.to(this.container, {
       opacity: 0,
       x: -20,
@@ -152,7 +170,7 @@ export class SamanaForm {
     const formElement = e.target as HTMLFormElement;
     const submitBtn = formElement.querySelector(
       'button[type="submit"]',
-    ) as HTMLButtonElement;
+    ) as HTMLButtonElement | null;
 
     if (!submitBtn) return;
 
@@ -166,7 +184,7 @@ export class SamanaForm {
         ...Object.fromEntries(formData),
       };
 
-      if ((window as any).gtag) {
+      if (typeof window !== "undefined" && (window as any).gtag) {
         (window as any).gtag("event", "form_submit", {
           form_name: "samana_contact",
           service_type: payload.type || "unknown",
@@ -186,16 +204,14 @@ export class SamanaForm {
       });
 
       if (response.ok) {
-        // Track conversion
-        if ((window as any).gtag) {
+        if (typeof window !== "undefined" && (window as any).gtag) {
           (window as any).gtag("event", "conversion", {
             send_to: "samana_contact_conversion",
           });
         }
-        // Redirect to thank you page
         window.location.href = "/gracias";
       } else {
-        throw new Error("Error en la respuesta del servidor");
+        throw new Error(`Server responded with ${response.status}`);
       }
     } catch (error) {
       console.error("Form submission error:", error);
@@ -203,7 +219,7 @@ export class SamanaForm {
       submitBtn.innerText = "ERROR - REINTENTAR";
       gsap.to(submitBtn, { x: [-10, 10, -10, 10, 0], duration: 0.4 });
 
-      if ((window as any).gtag) {
+      if (typeof window !== "undefined" && (window as any).gtag) {
         (window as any).gtag("event", "form_error", {
           form_name: "samana_contact",
           error_message: error instanceof Error ? error.message : "unknown",

@@ -83,32 +83,36 @@
 </section>
 
 <script>
-  const video = document.getElementById("main-video") as HTMLVideoElement;
-  const btn = document.getElementById("video-control") as HTMLButtonElement;
+  function initVideo() {
+    const video = document.getElementById("main-video") as HTMLVideoElement;
+    const btn = document.getElementById("video-control") as HTMLButtonElement;
 
-  if(video && btn) {
-    window.addEventListener("load", () => {
-      video.play().then(() => {
-        btn.style.opacity = "0";
-      }).catch(() => {
-        btn.style.opacity = "1";
+    if(video && btn) {
+      document.fonts.ready.then(() => {
+        video.play().then(() => {
+          btn.style.opacity = "0";
+        }).catch(() => {
+          btn.style.opacity = "1";
+        });
       });
-    });
 
-    video.onended = () => {
-      btn.style.opacity = "1";
-    };
-
-    btn.addEventListener("click", () => {
-      if (video.paused) {
-        video.play();
-        btn.style.opacity = "0";
-      } else {
-        video.pause();
+      video.onended = () => {
         btn.style.opacity = "1";
-      }
-    });
+      };
+
+      btn.addEventListener("click", () => {
+        if (video.paused) {
+          video.play();
+          btn.style.opacity = "0";
+        } else {
+          video.pause();
+          btn.style.opacity = "1";
+        }
+      });
+    }
   }
+
+  document.addEventListener("astro:page-load", initVideo);
 </script>
 
 <style>

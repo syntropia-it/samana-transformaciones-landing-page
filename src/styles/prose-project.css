@@ -1,21 +1,24 @@
 /* ═══════════════════════════════════════════════════════════════
    prose-project.css
    Estilos definitivos del contenido MDX - Sistema Proporcional (No Recorte)
-   Actualizado por Morena - Respetando la apreciación total de las imágenes.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Custom properties ── */
+/* ── Custom properties — prose-specific tokens ── */
 :root {
-  --gold: #ffd700;
-  --gold-alpha: #ffd900c3;
+  --gold: var(--color-samana-1);
+  --gold-alpha: var(--color-prose-heading);
   --border: rgba(255, 255, 255, 0.1);
   --col-text: 65ch;
   --col-wide: 1200px;
+  --color-text-secondary: #9a9590;
+  --color-text-muted: #605c58;
+  --color-prose-strong: #e5e0d8;
+  --color-surface-raised: #0f0f0f;
 }
 
 /* ── Base ── */
 .prose-project {
-  color: #d1d5db;
+  color: var(--color-text-secondary);
   max-width: var(--col-wide); 
   margin-left: auto;
   margin-right: auto;
@@ -29,13 +32,13 @@
 
 /* ── Headings ── */
 .prose-project h2 {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-serif);
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.02em;
   line-height: 1;
-  color: var(--gold-alpha);
+  color: var(--color-prose-heading);
   margin-top: 1rem;
   margin-bottom: 2rem;
   padding-top: 0;
@@ -46,17 +49,17 @@
   display: block;
   width: 5rem;
   height: 1px;
-  background: var(--gold);
+  background: var(--color-samana-1);
   margin-bottom: 1.5rem;
 }
 
 .prose-project h3 {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-serif);
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--gold-alpha);
+  color: var(--color-prose-heading);
   margin-top: 3rem;
   margin-bottom: 1rem;
 }
@@ -65,13 +68,13 @@
 .prose-project p {
   font-size: 1.125rem;
   line-height: 1.85;
-  color: #d1d5dc;
+  color: var(--color-text-secondary);
   margin-bottom: 1.5rem;
 }
 
 /* ── Inline elements ── */
 .prose-project strong {
-  color: #e5e7eb;
+  color: var(--color-prose-strong);
   font-weight: 600;
 }
 
@@ -80,8 +83,8 @@
   max-width: 60ch;
   margin: 6rem auto;
   padding: 4rem;
-  background: #0f0f0f;
-  border-left: 3px solid var(--gold);
+  background: var(--color-surface-raised);
+  border-left: 3px solid var(--color-samana-1);
   position: relative;
   border-radius: 1rem;
 }
@@ -93,8 +96,8 @@
   left: 3rem;
   font-weight: 900;
   font-size: 8rem;
-  font-family: "Playfair Display", serif;
-  color: var(--gold);
+  font-family: var(--font-serif);
+  color: var(--color-samana-1);
   opacity: 0.3;
   padding-bottom: 1rem;
   line-height: 1;
@@ -104,7 +107,7 @@
   font-size: 1.25rem;
   line-height: 1.7;
   font-style: italic;
-  color: #d1d5db;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -142,7 +145,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4b5563;
+  color: var(--color-text-muted);
   margin-top: 1rem;
 }
 
@@ -274,7 +277,7 @@
 }
 
 .prose-project .stat-card {
-  background: #0a0a0a;
+  background: var(--color-surface-raised);
   padding: 3rem 2rem;
   text-align: center; 
 }
@@ -283,7 +286,7 @@
   font-size: 3.5rem;
   font-family: Georgia, serif;
   font-weight: 900;
-  color: var(--gold);
+  color: var(--color-samana-1);
   line-height: 1;
   margin-bottom: 0.75rem;
 }
@@ -292,7 +295,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 /* ── Responsive Headings/Text (Modificado para que el texto sea coherente) ── */

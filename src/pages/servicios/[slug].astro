@@ -43,7 +43,7 @@ const additionalSchema = [breadcrumbSchema];
   schemaType="service"
   canonical={canonicalURL}
   additionalSchema={additionalSchema}
-  preFooter="cta"
+  preFooter={true}
 >
   <main class="bg-linear-to-b from-transparent via-black to-amber-900/20 text-white">
     <!-- HERO -->
@@ -189,7 +189,7 @@ const additionalSchema = [breadcrumbSchema];
     }
 
     function initScrollReveals() {
-        document.querySelectorAll('.prose-samana h2, .prose-samana p, .prose-samana li')
+        document.querySelectorAll('.prose-project h2, .prose-project p, .prose-project li')
             .forEach(el => {
                 gsap.set(el, { y: 50, opacity: 0 });
                 const tween = gsap.to(el, {
@@ -206,7 +206,7 @@ const additionalSchema = [breadcrumbSchema];
                 if (tween.scrollTrigger) localTriggers.push(tween.scrollTrigger);
             });
 
-        document.querySelectorAll('.prose-samana img').forEach(img => {
+        document.querySelectorAll('.prose-project img').forEach(img => {
             gsap.set(img, { scale: 1.1, opacity: 0, y: 30 });
             const tween = gsap.to(img, {
                 scale: 1,
@@ -233,46 +233,9 @@ const additionalSchema = [breadcrumbSchema];
 </script>
 
 <style is:global>
-    .prose-samana h2,
-    .prose-samana p,
-    .prose-samana img {
+    .prose-project h2,
+    .prose-project p,
+    .prose-project img {
         will-change: transform, opacity;
-    }
-    .prose-samana h2 {
-        font-size: 3rem;
-        font-family: serif;
-        text-transform: uppercase;
-        letter-spacing: -0.02em;
-    }
-
-    .prose-samana p {
-        font-size: 1.25rem;
-        line-height: 1.8;
-        color: #9ca3af;
-    }
-
-    .prose-samana img {
-        margin: 6rem 0;
-        width: 100%;
-    }
-    html.lenis,
-    html.lenis body {
-        height: auto;
-    }
-
-    .lenis.lenis-smooth {
-        scroll-behavior: auto !important;
-    }
-
-    .lenis.lenis-smooth [data-lenis-prevent] {
-        overscroll-behavior: contain;
-    }
-
-    .lenis.lenis-stopped {
-        overflow: hidden;
-    }
-
-    .lenis.lenis-scrolling iframe {
-        pointer-events: none;
     }
 </style>

@@ -52,7 +52,7 @@ const pageTitle = "Articulos — Samana";
       <div id="blog-container" class="flex gap-[8vw] px-[10vw] items-center">
         {
           allArticles.map((p, i) => (
-            <article class="project-item shrink-0 w-[85vw] md:w-[60vw] lg:w-[45vw] group">
+            <article class="blog-item shrink-0 w-[85vw] md:w-[60vw] lg:w-[45vw] group">
               <a href={`/blog/${String(p.slug)}`} class="block">
                 <div class="relative aspect-video overflow-hidden bg-[#0a0a0a] mb-6 rounded-sm">
                   <Image
@@ -93,7 +93,7 @@ const pageTitle = "Articulos — Samana";
       class="fixed bottom-2 left-0 w-full px-12 flex justify-between items-end z-20"
     >
       <div class="flex flex-col bg-black/50 rounded-br-3xl p-3 gap-1">
-        <p class="text-[10px] uppercase tracking-[0.4em] text-gray-1 00">
+        <p class="text-[10px] uppercase tracking-[0.4em] text-gray-100">
           Desplácese hacia abajo
         </p>
         <div class="text-4xl font-light font-mono" id="scroll-percentage">

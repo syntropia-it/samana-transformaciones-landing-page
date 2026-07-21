@@ -5,7 +5,7 @@ import BtnWhatsApp from "../components/core/ButtonWhatsApp.astro";
 import Navbar from "../components/layout/Navbar.astro";
 import Footer from "../components/layout/Footer.astro";
 import SEO from "../components/core/SEO.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
 import "../styles/global.css";
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
   publishDate?: Date;
   author?: string;
   tags?: string[];
-  preFooter?: 'cta';
+  preFooter?: boolean;
 }
 
 const {
@@ -46,7 +46,7 @@ const canonicalURL =
 // 2. Lógica de Ratings con tipado estricto
 let ratingsProp = Astro.props.ratings;
 
-if (!ratingsProp) {
+if (!ratingsProp && schemaType === "home") {
   try {
     const [projects, services, blog] = await Promise.all([
       getCollection("projects"),
@@ -139,7 +139,7 @@ if (!ratingsProp) {
 
   <body
     class="bg-black min-h-screen text-white selection:bg-[rgb(255,215,0)] selection:text-black overflow-x-hidden"
-    data-pre-footer={preFooter}
+    data-pre-footer={preFooter ? '' : undefined}
   >
     <!-- Skip navigation for keyboard/screen reader users -->
     <a
