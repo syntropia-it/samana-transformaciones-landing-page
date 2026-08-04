@@ -27,7 +27,10 @@ const pageTitle = "Nuestros Proyectos — Samana";
         </ol>
       </nav>
     </div>
-    <header class="fixed top-30 w-full pointer-events-none select-none z-10">
+    <header
+      id="showcase-header"
+      class="fixed top-30 w-full pointer-events-none select-none z-10"
+    >
       <span
         class="text-samana-1 pt-8 px-15 text-xs font-mono tracking-[0.5em] uppercase block"
         data-reveal-text
@@ -68,7 +71,7 @@ const pageTitle = "Nuestros Proyectos — Samana";
                   />
                 </div>
                 <div class="flex flex-col md:flex-row justify-between items-start pt-4 border-t border-white/20">
-                  <h2 class="text-xl md:text-3xl font-bold uppercase tracking-tighter">
+                  <h2 class="text-xl md:text-3xl font-bold uppercase tracking-tighter leading-tight line-clamp-2 min-h-[2.4em]">
                     {p.data.title}
                   </h2>
                   <div class="mt-2 md:mt-0 flex gap-4 items-center">
@@ -85,6 +88,7 @@ const pageTitle = "Nuestros Proyectos — Samana";
     </section>
 
     <footer
+      id="showcase-indicator"
       class="fixed bottom-2 left-0 w-full px-12 flex justify-between items-end z-20"
     >
       <div class="flex flex-col bg-black/50 rounded-br-3xl p-3 gap-1">
@@ -117,8 +121,41 @@ const pageTitle = "Nuestros Proyectos — Samana";
     const wrapper = document.getElementById("horizontal-wrapper");
     const percentageText = document.getElementById("scroll-percentage");
     const projectItems = document.querySelectorAll(".project-item");
+    const main = document.querySelector("main");
+    const showcaseHeader = document.getElementById("showcase-header");
+    const showcaseIndicator = document.getElementById("showcase-indicator");
 
     if (!container || !wrapper) return;
+
+    // El header y el indicador quedan fixed (idéntico a siempre) durante toda
+    // la aproximación y el pin — cero cambios ahí. Solo al soltarse el pin
+    // (100%) se "congelan" en su posición exacta y pasan a scrollear normal,
+    // en vez de flotar para siempre sobre el footer real. El footer en sí no
+    // necesita ninguna animación de entrada: entra por scroll normal y llano,
+    // igual que Contact después de GalleryProjects en Home.
+    function freeze(el) {
+      if (!el || !main) return;
+      const rect = el.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      el.style.position = "absolute";
+      el.style.top = `${rect.top - mainRect.top}px`;
+      el.style.bottom = "auto";
+    }
+
+    function unfreeze(el) {
+      if (!el) return;
+      el.style.position = "";
+      el.style.top = "";
+      el.style.bottom = "";
+    }
+
+    // En mobile el footer real no fuerza alto completo (es compacto), así que
+    // el indicador —grande, con fondo propio— le queda compitiendo la
+    // atención. Se desvanece por el propio progreso de la galería (mismo
+    // patrón que la barrita bajo "ver más proyectos" en Home), no atado a
+    // cuándo aparece el footer.
+    const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
+    const INDICATOR_FADE_START = 0.85;
 
     const scrollTween = gsap.to(container, {
       x: () => -(container.scrollWidth - window.innerWidth),
@@ -134,6 +171,37 @@ const pageTitle = "Nuestros Proyectos — Samana";
           const progress = Math.round(self.progress * 100);
           if (percentageText)
             percentageText.innerText = `${progress.toString().padStart(2, "0")}%`;
+
+          if (isMobile()) {
+            const fade = Math.max(
+              0,
+              Math.min(
+                1,
+                (self.progress - INDICATOR_FADE_START) /
+                  (1 - INDICATOR_FADE_START),
+              ),
+            );
+            if (showcaseIndicator) showcaseIndicator.style.opacity = String(1 - fade);
+          }
+        },
+        onLeave: () => {
+          freeze(showcaseHeader);
+          if (isMobile()) {
+            if (showcaseIndicator) showcaseIndicator.style.display = "none";
+          } else {
+            freeze(showcaseIndicator);
+          }
+        },
+        onEnterBack: () => {
+          unfreeze(showcaseHeader);
+          if (isMobile()) {
+            if (showcaseIndicator) {
+              showcaseIndicator.style.display = "";
+              showcaseIndicator.style.opacity = "1";
+            }
+          } else {
+            unfreeze(showcaseIndicator);
+          }
         },
       },
     });

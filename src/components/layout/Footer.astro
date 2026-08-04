@@ -34,16 +34,10 @@ const socialLinks = [
 ---
 
 <footer
-  class="bg-black text-gray-400 relative z-30 md:border-t md:border-dashed md:border-white/15 flex flex-col md:min-h-dvh"
+  class="bg-linear-to-t from-amber-900/20 to-black text-gray-400 relative z-30 overflow-hidden md:border-t md:border-dashed md:border-white/15 flex flex-col md:min-h-dvh md:pt-24"
 >
-  <!-- Amber glow — top edge only -->
-  <div
-    class="absolute inset-0 bg-linear-to-b from-amber-900/25 to-transparent pointer-events-none z-0"
-    aria-hidden="true"
-  ></div>
-
   <!-- Email CTA — centrado -->
-  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-10 flex flex-col items-center text-center border-b border-white/[0.06]">
+  <div data-footer-reveal class="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-10 flex flex-col items-center text-center border-b border-white/[0.06]">
 
     <!-- Brand label -->
     <p class="text-xs font-bold tracking-[0.3em] text-samana-1/60 uppercase mb-4">
@@ -86,7 +80,7 @@ const socialLinks = [
   </div>
 
   <!-- Nav grid: 2 cols mobile / 3 cols desktop -->
-  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-10">
+  <div data-footer-reveal class="relative z-10 max-w-7xl mx-auto px-6 pt-10">
     <div class="grid grid-cols-2 md:grid-cols-3 gap-8 pb-10">
 
       <!-- Servicios -->
@@ -137,73 +131,131 @@ const socialLinks = [
         </ul>
       </div>
     </div>
-
-  <!-- SAMANA watermark — crece para llenar el espacio restante y empujar el bottom bar -->
-  <div class="samana-zone relative z-0 overflow-hidden flex-1 flex items-end" aria-hidden="true">
-    <span class="samana-text font-bold uppercase whitespace-nowrap inline-block text-white/10">
-      Samana
-    </span>
   </div>
 
-  <!-- Bottom bar -->
-  <div class="relative z-10 max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+  <!-- SAMANA watermark — ocupa el espacio libre entre el navgrid y el copyright,
+       se recorta contra su propio borde inferior (no el de la pantalla), mismo
+       tratamiento que FinalCTA. El copyright queda debajo, sin superponerse. -->
+  <div
+    class="samana-zone relative flex-1 min-h-[20vw] overflow-hidden pb-3 pointer-events-none select-none z-0"
+    aria-hidden="true"
+  >
+    <h2
+      class="absolute inset-x-0 -bottom-5 sm:-bottom-10 md:-bottom-16 text-[25vw] font-bold leading-none tracking-tighter uppercase text-white opacity-[0.1] translate-x-[-5%]"
+    >
+      Samana
+    </h2>
+  </div>
+
+  <!-- Copyright — espacio mínimo, sin línea ni fondo propio, sigue el degradé del footer -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 pt-1 pb-4 flex justify-between items-center w-full">
     <span class="text-xs font-mono tracking-[0.12em] uppercase text-gray-700">
       © {currentYear} Samana Transformaciones. Buenos Aires, Argentina.
     </span>
   </div>
 </footer>
 
-<style>
-  .samana-text {
-    font-size: 10vw; /* fallback — JS override en astro:page-load */
-    letter-spacing: -0.03em;
-    line-height: 0.82;
-  }
-</style>
-
 <script>
-  let resizeObserver: ResizeObserver | null = null;
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-  function fitSamana() {
-    const zone = document.querySelector('.samana-zone') as HTMLElement | null;
-    const text = document.querySelector('.samana-text') as HTMLElement | null;
-    if (!zone || !text) return;
+  gsap.registerPlugin(ScrollTrigger);
 
-    const containerW = zone.getBoundingClientRect().width;
-    if (containerW === 0) return;
+  let samanaTrigger: ScrollTrigger | null = null;
+  let contentRevealTriggers: ScrollTrigger[] = [];
 
-    text.style.display   = 'inline-block';
-    text.style.fontSize  = '200px';
-    text.style.whiteSpace = 'nowrap';
+  const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
 
-    const textW = text.getBoundingClientRect().width;
-    if (textW === 0) return;
+  // Email-CTA y nav-grid "suben y se acomodan" al entrar en vista — solo mobile
+  // (en desktop el footer ya se ve bien tal cual, sin animación de entrada acá).
+  // Mismo diferido por rAF que el resto de este archivo: evita que Layout.astro
+  // mate el trigger apenas nace (ver comentario en applyMode).
+  function applyContentReveal() {
+    contentRevealTriggers.forEach((t) => t.kill());
+    contentRevealTriggers = [];
 
-    text.style.fontSize = Math.round((containerW / textW) * 200 * 0.99) + 'px';
+    if (!isMobile()) return;
+
+    requestAnimationFrame(() => {
+      const blocks = document.querySelectorAll('[data-footer-reveal]');
+      blocks.forEach((el) => {
+        const tween = gsap.from(el, {
+          y: 60,
+          opacity: 0,
+          duration: 1.4,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 90%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+        if (tween.scrollTrigger) contentRevealTriggers.push(tween.scrollTrigger);
+      });
+    });
   }
 
   function applyMode() {
     const zone = document.querySelector('.samana-zone') as HTMLElement | null;
-    if (!zone) return;
+    const h2 = zone?.querySelector('h2') ?? null;
+    if (!zone || !h2) return;
+
+    samanaTrigger?.kill();
+    samanaTrigger = null;
 
     const isCondensed = document.body.hasAttribute('data-pre-footer');
     zone.style.display = isCondensed ? 'none' : '';
+    if (isCondensed) return;
 
-    if (!isCondensed) {
-      resizeObserver?.disconnect();
-      resizeObserver = new ResizeObserver(() => fitSamana());
-      resizeObserver.observe(zone);
-      document.fonts.ready.then(() => requestAnimationFrame(fitSamana));
-    } else {
-      resizeObserver?.disconnect();
-      resizeObserver = null;
+    // Layout.astro mata todos los ScrollTrigger vivos al principio de su propio
+    // handler de 'astro:page-load' (limpieza de la página anterior en view
+    // transitions). Si creamos el nuestro en el mismo tick, muere apenas nace.
+    // Cycle.astro esquiva esto mismo difiriendo su init a un rAF — replicamos el patrón.
+    requestAnimationFrame(() => {
+      // El watermark es el último elemento de la página: a diferencia del data-reveal
+      // global ('top 90%'), acá no queda recorrido de scroll después para cumplir ese
+      // umbral. Dispara apenas asoma desde abajo, con la misma animación que FinalCTA.
+      const tween = gsap.from(h2, {
+        y: 80,
+        opacity: 0,
+        duration: 1.6,
+        ease: 'expo.out',
+        scrollTrigger: {
+          trigger: zone,
+          start: 'top bottom',
+          toggleActions: 'play none none reverse',
+        },
+      });
+      samanaTrigger = tween.scrollTrigger ?? null;
+    });
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    applyMode();
+    applyContentReveal();
+  });
+  document.addEventListener('astro:before-swap', () => {
+    samanaTrigger?.kill();
+    samanaTrigger = null;
+    contentRevealTriggers.forEach((t) => t.kill());
+    contentRevealTriggers = [];
+  });
+</script>
+
+<style is:global>
+  /* En páginas con FinalCTA previo, ese bloque ya es el cierre visual grande —
+     el footer vuelve a su alto natural en vez de forzar el viewport completo. */
+  @media (min-width: 768px) {
+    body[data-pre-footer] footer {
+      min-height: 0;
     }
   }
 
-  document.addEventListener('astro:page-load', applyMode);
-
-  document.addEventListener('astro:before-swap', () => {
-    resizeObserver?.disconnect();
-    resizeObserver = null;
-  });
-</script>
+  /* FinalCTA ya termina en ámbar abajo (bg-linear-to-t from-amber-900/20 to-black).
+     El footer condensado (sin SAMANA) repite el mismo degradé "ámbar abajo,
+     negro arriba" — dos degradés iguales seguidos generan un corte brusco justo
+     en la unión. Acá se invierte: ámbar arriba (continúa el FinalCTA) → negro abajo. */
+  body[data-pre-footer] footer {
+    background-image: linear-gradient(to bottom, rgb(120 53 15 / 0.2), black);
+  }
+</style>

@@ -3,7 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import '../../styles/prose-project.css';
-import CTAServices from '../../components/sections/services/CTAServices.astro';
+import FinalCTA from '../../components/shared/FinalCTA.astro';
 
 export async function getStaticPaths() {
   const services = await getCollection('services');
@@ -151,7 +151,12 @@ const additionalSchema = [breadcrumbSchema];
     </section>
 
     <!-- CTA -->
-    <CTAServices />
+    <FinalCTA
+      title="¿Estás pensando en remodelar tu casa?"
+      paragraph="Transformamos espacios para que reflejen tu esencia y tu forma de vivir."
+      buttonText="Inicia tu Proyecto"
+      buttonLink="/contacto"
+    />
   </main>
 </Layout>
 
