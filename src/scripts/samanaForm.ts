@@ -217,7 +217,15 @@ export class SamanaForm {
       console.error("Form submission error:", error);
       submitBtn.disabled = false;
       submitBtn.innerText = "ERROR - REINTENTAR";
-      gsap.to(submitBtn, { x: [-10, 10, -10, 10, 0], duration: 0.4 });
+      gsap.to(submitBtn, {
+        keyframes: [
+          { x: -10, duration: 0.08 },
+          { x: 10, duration: 0.08 },
+          { x: -10, duration: 0.08 },
+          { x: 10, duration: 0.08 },
+          { x: 0, duration: 0.08 },
+        ],
+      });
 
       if (typeof window !== "undefined" && (window as any).gtag) {
         (window as any).gtag("event", "form_error", {
