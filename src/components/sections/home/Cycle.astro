@@ -33,7 +33,7 @@ function splitTitle(title: string): [string, string] {
 ---
 
 <section id="ciclo-maestria" class="bg-linear-to-b via-neutral-900 from-black/40 to-zinc-950/60 relative z-30">
-    <div class="cycle-mobile" data-lenis-prevent>
+    <div class="cycle-mobile">
         {cycleData.map((item, i) => {
             const [line1, line2] = splitTitle(item.title);
             return (
@@ -66,7 +66,7 @@ function splitTitle(title: string): [string, string] {
     </div>
     <div class="cycle-desktop">
     <div class="relative w-full h-[80dvh] md:h-screen scroll-container">
-        <div class="sticky top-0 h-screen w-full flex flex-col md:flex-row overflow-hidden">
+        <div class="h-screen w-full flex flex-col md:flex-row overflow-hidden">
             <div
                 class="w-full md:w-1/2 h-full flex items-center justify-center  px-8 border-r border-white/5 z-20"
             >
@@ -124,7 +124,7 @@ function splitTitle(title: string): [string, string] {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const MOBILE_QUERY = '(hover: none) and (pointer: coarse)';
+  const MOBILE_QUERY = '(max-width: 1023px)';
 
   let mobileScrollCleanup: (() => void) | null = null;
 
@@ -134,44 +134,60 @@ function splitTitle(title: string): [string, string] {
     const container = document.querySelector('.cycle-mobile') as HTMLElement | null;
     const panels = Array.from(document.querySelectorAll('.cycle-mobile-panel')) as HTMLElement[];
     const progressFill = document.querySelector('.cycle-progress-fill') as HTMLElement | null;
+    const bar = document.querySelector('.cycle-progress-bar') as HTMLElement | null;
+    const section = document.querySelector('#ciclo-maestria') as HTMLElement | null;
 
     if (!container || !panels.length) return;
 
-    const scrollEl = container;
-    const panelCount = panels.length;
+    ScrollTrigger.getAll().forEach(st => {
+      if (st.trigger === container) st.kill();
+    });
 
-    panels.forEach(p => p.classList.remove('panel-active'));
+    const totalItems = panels.length;
+    let lastActive = 0;
 
-    function updateActivePanel() {
-      const activeIndex = Math.min(
-        Math.round(scrollEl.scrollTop / scrollEl.clientHeight),
-        panelCount - 1
-      );
-      panels.forEach((p, i) => p.classList.toggle('panel-active', i === activeIndex));
-      if (progressFill) progressFill.style.width = `${((activeIndex + 1) / panelCount) * 100}%`;
-    }
+    gsap.set(panels, { opacity: 0 });
+    panels.forEach((p, i) => p.classList.toggle('panel-active', i === 0));
 
-    const bar = document.querySelector('.cycle-progress-bar') as HTMLElement | null;
-    const section = document.querySelector('#ciclo-maestria') as HTMLElement | null;
+    // Mismo mecanismo que GalleryProjects mobile (pin + scrub:1, ya probado y
+    // liviano) en vez de un scroll interno propio — evita que el scroll de la
+    // página y el scroll de los paneles compitan entre sí.
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: 'top top',
+        end: () => `+=${window.innerHeight * totalItems}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          const activeIndex = Math.min(Math.floor(self.progress * totalItems), totalItems - 1);
+          if (activeIndex !== lastActive) {
+            panels[lastActive]?.classList.remove('panel-active');
+            panels[activeIndex]?.classList.add('panel-active');
+            lastActive = activeIndex;
+          }
+          if (progressFill) progressFill.style.width = `${((activeIndex + 1) / totalItems) * 100}%`;
+        },
+      },
+    });
+
+    panels.forEach((panel, i) => {
+      tl.to(panel, { opacity: 1, duration: 0.2, ease: 'power2.out' }, i);
+      if (i < totalItems - 1) {
+        tl.to(panel, { opacity: 0, duration: 0.2, ease: 'power2.in' }, i + 0.7);
+      }
+    });
+
     let sectionObs: IntersectionObserver | null = null;
-
-    if (section) {
+    if (section && bar) {
       sectionObs = new IntersectionObserver(([entry]) => {
-        if (bar) bar.style.opacity = entry.isIntersecting ? '1' : '0';
-        if (entry.isIntersecting) {
-          // Sección entró al viewport: activar panel actual y disparar animación
-          updateActivePanel();
-        } else {
-          // Sección salió: resetear para que la animación se repita en la próxima visita
-          panels.forEach(p => p.classList.remove('panel-active'));
-        }
+        bar.style.opacity = entry.isIntersecting ? '1' : '0';
       }, { threshold: 0.15 });
       sectionObs.observe(section);
     }
 
-    scrollEl.addEventListener('scroll', updateActivePanel, { passive: true });
     mobileScrollCleanup = () => {
-      scrollEl.removeEventListener('scroll', updateActivePanel);
       sectionObs?.disconnect();
     };
   }
@@ -203,22 +219,26 @@ function splitTitle(title: string): [string, string] {
         trigger: container,
         start: 'top top',
         end: () => `+=${window.innerHeight * totalItems}`,
-        scrub: true,
+        scrub: 1,
         pin: true,
         anticipatePin: 1,
       },
     });
 
+    // Antes: fade de 0.2 + hold de 0.5 + hueco de 0.1 sin nada visible entre
+    // items — eso es lo que se sentía "trabado" (mucho scroll sin respuesta
+    // visual). Ahora el fade dura más (0.35) y el próximo item entra justo
+    // cuando el anterior termina de salir, sin hueco muerto en el medio.
     textItems.forEach((text: any, i: number) => {
       const img = imgItems[i];
       if (!text || !img) return;
 
-      tl.to(text, { opacity: 1, y: 0, duration: 0.2, ease: 'power2.out' }, i);
-      tl.to(img, { opacity: 0.6, scale: 1, duration: 0.2, ease: 'power2.out' }, i);
+      tl.to(text, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }, i);
+      tl.to(img, { opacity: 0.6, scale: 1, duration: 0.35, ease: 'power2.out' }, i);
 
       if (i < totalItems - 1) {
-        tl.to(text, { opacity: 0, y: -40, duration: 0.2, ease: 'power2.in' }, i + 0.7);
-        tl.to(img, { opacity: 0, scale: 1.1, duration: 0.2, ease: 'power2.in' }, i + 0.7);
+        tl.to(text, { opacity: 0, y: -40, duration: 0.35, ease: 'power2.in' }, i + 0.65);
+        tl.to(img, { opacity: 0, scale: 1.1, duration: 0.35, ease: 'power2.in' }, i + 0.65);
       }
     });
 
@@ -258,30 +278,27 @@ function splitTitle(title: string): [string, string] {
     .cycle-mobile  { display: none; }
     .cycle-desktop { display: block; }
 
-    @media (hover: none) and (pointer: coarse) {
-        .cycle-mobile  { display: flex; }
+    @media (max-width: 1023px) {
+        .cycle-mobile  { display: block; }
         .cycle-desktop { display: none; }
     }
 
-    /* ── Mobile scroll-snap container ── */
+    /* ── Mobile pinned container — un solo scroll (el de la página), GSAP
+       mapea el progreso a qué panel se ve. Nada de overflow/scroll propio. ── */
     .cycle-mobile {
-        flex-direction: column;
         height: 100svh;
-        overflow-y: scroll;
-        scroll-snap-type: y mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
         position: relative;
+        overflow: hidden;
     }
-    .cycle-mobile::-webkit-scrollbar { display: none; }
 
-    /* ── Panels ── */
+    /* ── Panels — apilados uno sobre otro, el cross-fade lo controla GSAP
+       vía opacity (sin transition acá: pelearía con los valores que GSAP
+       escribe en cada frame del scrub, igual que ya nos pasó en Cycle
+       desktop). ── */
     .cycle-mobile-panel {
-        flex-shrink: 0;
-        width: 100%;
-        height: 100svh;
-        scroll-snap-align: start;
-        position: relative;
+        position: absolute;
+        inset: 0;
+        opacity: 0;
         overflow: hidden;
     }
 
@@ -427,7 +444,7 @@ function splitTitle(title: string): [string, string] {
         transition: opacity 0.3s ease;
     }
 
-    @media (hover: none) and (pointer: coarse) {
+    @media (max-width: 1023px) {
         .cycle-progress-bar { display: block; }
     }
 
