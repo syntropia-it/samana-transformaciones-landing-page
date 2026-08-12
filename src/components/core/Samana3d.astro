@@ -89,10 +89,10 @@
         }, { once: true });
     }
 
-    // No cargar Three.js en móviles, tablets o conexiones lentas
+    // No cargar Three.js en móviles, tablets o conexiones lentas — la figura
+    // es un elemento de escritorio, no depende de si el dispositivo es táctil.
     function shouldLoadWebGL(): boolean {
-        // Dispositivos táctiles sin mouse
-        if ('ontouchstart' in window && window.innerWidth < 768) return false;
+        if (window.innerWidth < 1280) return false;
         // Conexiones lentas o modo ahorro de datos
         const conn = (navigator as any).connection;
         if (conn && (conn.saveData || ['slow-2g', '2g'].includes(conn.effectiveType))) return false;
