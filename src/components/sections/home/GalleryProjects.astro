@@ -11,7 +11,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 
 <section
   id="proyectos-preview"
-  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-12 md:pt-24 pb-0 md:pb-14"
+  class="bg-linear-to-t to-zinc-950/60 from-transparent relative z-30 border-t border-white/10 overflow-hidden pt-12 md:pt-24 pb-0 md:pb-6 lg:pb-14"
 >
   <!-- Header fijo -->
   <div class="px-6 container mx-auto mb-8 md:mb-12">
@@ -30,7 +30,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
 
       <a
         href="/proyectos"
-        class="hidden md:inline-block border border-samana-1 text-samana-1 px-6 py-3 font-bold hover:bg-samana-1 hover:text-black transition-all hoverable"
+        class="hidden lg:inline-block border border-samana-1 text-samana-1 px-6 py-3 font-bold hover:bg-samana-1 hover:text-black transition-all hoverable"
         data-cta="view-all-projects"
       >
         Ver todos →
@@ -53,7 +53,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     >
       {proyectosParaMostrar.map((p, i) => (
         <article
-          class="relative w-[70vw] md:w-[28vw] h-auto md:h-[50vh] shrink-0 group hoverable"
+          class="relative w-[70vw] md:w-[28vw] h-auto md:h-[min(50vh,45vw)] shrink-0 group hoverable"
           data-project-card={i}
         >
           <!-- Número grande de fondo -->
@@ -104,8 +104,10 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     </div>
   </div>
 
-  <!-- CTA mobile — flujo normal, siempre visible, con margen del card -->
-  <div class="md:hidden flex justify-center px-6 mt-12 pb-12">
+  <!-- CTA mobile/tablet — flujo normal, siempre visible, con margen del card.
+       Visible hasta 1023px: recién a partir de escritorio (1024px+) se
+       reemplaza por el botón "Ver todos →" de arriba. -->
+  <div class="lg:hidden flex justify-center px-6 mt-12 md:mt-6 pb-12 md:pb-4">
     <a
       href="/proyectos"
       class="inline-flex items-center gap-3 text-[11px] font-mono tracking-[0.28em] uppercase text-samana-1/50 hover:text-samana-1 transition-colors duration-500 hoverable"
@@ -130,6 +132,7 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
     const track = document.querySelector('[data-projects-track]') as HTMLElement | null;
     const wrapper = document.querySelector('[data-projects-wrapper]') as HTMLElement | null;
     const section = document.querySelector('#proyectos-preview') as HTMLElement | null;
+    const ctaLink = document.querySelector('[data-cta="view-all-projects-mobile"]') as HTMLElement | null;
 
     if (!track || !section || !wrapper) return;
 
@@ -139,7 +142,6 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
       wrapper.style.paddingTop = '44px';
 
       const cards = Array.from(section.querySelectorAll('[data-project-card]')) as HTMLElement[];
-      const ctaLink = section.querySelector('[data-cta="view-all-projects-mobile"]') as HTMLElement | null;
       let lastActiveIndex = 0;
       if (cards[0]) cards[0].classList.add('card-active');
 
@@ -201,6 +203,14 @@ const proyectosParaMostrar = proyectosDestacados.slice(0, 6);
           scrub: 1,
           invalidateOnRefresh: true,
           anticipatePin: 1,
+          onUpdate: (self) => {
+            // Mismo umbral que mobile — visible tablet+desktop, aunque el
+            // link con el subrayado solo se ve hasta 1023px (arriba de eso
+            // ya está el botón "Ver todos →").
+            if (self.progress >= 0.85 && ctaLink && !ctaLink.classList.contains('cta-visible')) {
+              ctaLink.classList.add('cta-visible');
+            }
+          },
         },
       });
 
