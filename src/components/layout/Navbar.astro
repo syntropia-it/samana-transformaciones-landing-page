@@ -30,7 +30,7 @@ const navLinks = [
         aria-label="Abrir menú de navegación"
         aria-expanded="false"
         aria-controls="mobile-menu"
-        class="md:hidden z-100 relative w-12 h-12 flex items-center justify-center"
+        class="lg:hidden z-100 relative w-12 h-12 flex items-center justify-center"
     >
         <Menu
             size={32}
@@ -46,7 +46,7 @@ const navLinks = [
         />
     </button>
 
-    <div class="hidden md:flex gap-6 text-lg font-medium items-center tracking-wide text-gray-300">
+    <div class="hidden lg:flex gap-6 text-lg font-medium items-center tracking-wide text-gray-300">
         {
             navLinks.map(link => (
                 <a href={link.href} class="hover:text-white transition-colors duration-300">
